@@ -1,0 +1,226 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 12 - ASG with ELB health checks, internal ALB, termination lifecycle hook that saves logs, instance refresh
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  VpcCidr:
+    Type: String
+    Default: 172.31.0.0/16
+    Description: CIDR of the VPC (default VPCs use 172.31.0.0/16). Only this range can reach the internal ALB.
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  AppVersion:
+    Type: String
+    Default: v1
+  LatestAmi:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+Resources:
+  LogBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  AlbSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Internal ALB - HTTP from inside the VPC only
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: !Ref VpcCidr }
+
+  InstanceSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Web instances - HTTP only from the ALB
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, SourceSecurityGroupId: !Ref AlbSG }
+
+  Alb:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internal
+      Subnets: !Ref Subnets
+      SecurityGroups: [!Ref AlbSG]
+
+  TargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      VpcId: !Ref VpcId
+      Port: 80
+      Protocol: HTTP
+      TargetType: instance
+      HealthCheckPath: /health
+      HealthCheckIntervalSeconds: 10
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 2
+      TargetGroupAttributes:
+        - { Key: deregistration_delay.timeout_seconds, Value: "30" }
+
+  Listener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref Alb
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref TargetGroup
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: save-logs-and-finish-hook
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub ${LogBucket.Arn}/*
+              - Effect: Allow
+                Action: autoscaling:CompleteLifecycleAction
+                Resource: !Sub arn:${AWS::Partition}:autoscaling:${AWS::Region}:${AWS::AccountId}:autoScalingGroup:*:autoScalingGroupName/dop-lab12-asg
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref InstanceRole]
+
+  LaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        ImageId: !Ref LatestAmi
+        InstanceType: t3.micro
+        IamInstanceProfile: { Arn: !GetAtt InstanceProfile.Arn }
+        SecurityGroupIds: [!Ref InstanceSG]
+        MetadataOptions: { HttpTokens: required }
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - { Key: Name, Value: dop-lab12-web }
+              - { Key: Lab, Value: dop-lab12 }
+        UserData:
+          Fn::Base64: !Sub |
+            #!/bin/bash
+            dnf install -y httpd
+            echo "<h1>DOP Lab 12 - ${AppVersion} - $(hostname)</h1>" > /var/www/html/index.html
+            echo ok > /var/www/html/health
+            systemctl enable --now httpd
+            for i in $(seq 1 20); do echo "$(date) ${AppVersion} app log line $i" >> /var/log/app.log; done
+
+  ASG:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AutoScalingGroupName: dop-lab12-asg
+      MinSize: "2"
+      MaxSize: "4"
+      DesiredCapacity: "2"
+      VPCZoneIdentifier: !Ref Subnets
+      LaunchTemplate:
+        LaunchTemplateId: !Ref LaunchTemplate
+        Version: !GetAtt LaunchTemplate.LatestVersionNumber
+      TargetGroupARNs: [!Ref TargetGroup]
+      HealthCheckType: ELB              # replace instances that fail the ALB health check, not only EC2 status checks
+      HealthCheckGracePeriod: 120       # give new instances time to boot before health checks count
+      LifecycleHookSpecificationList:
+        - LifecycleHookName: save-logs-before-terminate
+          LifecycleTransition: autoscaling:EC2_INSTANCE_TERMINATING
+          HeartbeatTimeout: 300
+          DefaultResult: CONTINUE
+
+  HookFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: send-command
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: ssm:SendCommand
+                Resource:
+                  - !Sub arn:${AWS::Partition}:ssm:${AWS::Region}::document/AWS-RunShellScript
+                  - !Sub arn:${AWS::Partition}:ec2:${AWS::Region}:${AWS::AccountId}:instance/*
+
+  HookFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: dop-lab12-terminate-hook
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt HookFunctionRole.Arn
+      Timeout: 30
+      Environment:
+        Variables:
+          BUCKET: !Ref LogBucket
+      Code:
+        ZipFile: |
+          import os, boto3
+          ssm = boto3.client("ssm")
+          def handler(event, context):
+              d = event["detail"]
+              iid, hook, asg = d["EC2InstanceId"], d["LifecycleHookName"], d["AutoScalingGroupName"]
+              region, bucket = event["region"], os.environ["BUCKET"]
+              print(f"instance {iid} is terminating (hook {hook}); asking it to upload logs")
+              script = [
+                  f"aws s3 cp /var/log/app.log s3://{bucket}/{iid}/app.log --region {region}",
+                  f"aws autoscaling complete-lifecycle-action --lifecycle-hook-name {hook} "
+                  f"--auto-scaling-group-name {asg} --lifecycle-action-result CONTINUE --instance-id {iid} --region {region}",
+              ]
+              r = ssm.send_command(InstanceIds=[iid], DocumentName="AWS-RunShellScript",
+                                   Parameters={"commands": script}, Comment="lab12 save logs before terminate")
+              print("command id:", r["Command"]["CommandId"])
+
+  TerminateHookRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Run the log-saving function when an instance enters Terminating:Wait
+      EventPattern:
+        source: [aws.autoscaling]
+        detail-type: [EC2 Instance-terminate Lifecycle Action]
+        detail:
+          AutoScalingGroupName: [dop-lab12-asg]
+      Targets:
+        - Id: hook-fn
+          Arn: !GetAtt HookFunction.Arn
+
+  HookFunctionPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref HookFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt TerminateHookRule.Arn
+
+Outputs:
+  AlbDns:
+    Value: !GetAtt Alb.DNSName
+  LogBucketName:
+    Value: !Ref LogBucket
+  TargetGroupArn:
+    Value: !Ref TargetGroup

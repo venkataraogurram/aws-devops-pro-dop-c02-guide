@@ -1,0 +1,47 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 06 - baseline deployed to every target account/Region by a StackSet
+
+Parameters:
+  Environment:
+    Type: String
+    Default: sandbox
+  CreateBucket:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+  BucketNameSuffix:
+    Type: String
+    Default: global
+    Description: Part of the bucket name. Leave "global" to reproduce the name clash; set "region" to fix it.
+    AllowedValues: [global, region]
+
+Conditions:
+  MakeBucket: !Equals [!Ref CreateBucket, "true"]
+  PerRegionName: !Equals [!Ref BucketNameSuffix, region]
+
+Resources:
+  BaselineParam:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: /dop-lab06/baseline
+      Type: String
+      Value: !Sub "env=${Environment} region=${AWS::Region}"
+
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: dop-lab06-alerts
+
+  LogsBucket:
+    Type: AWS::S3::Bucket
+    Condition: MakeBucket
+    Properties:
+      BucketName: !If
+        - PerRegionName
+        - !Sub dop-lab06-${AWS::AccountId}-${AWS::Region}
+        - !Sub dop-lab06-${AWS::AccountId}          # same name in every Region -> second Region fails
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true

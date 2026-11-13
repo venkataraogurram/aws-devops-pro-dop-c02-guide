@@ -1,2 +1,5 @@
 .DS_Store
 *.pdf
+*.zip
+.aws-sam/
+samconfig.toml

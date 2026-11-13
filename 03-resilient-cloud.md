@@ -1,8 +1,25 @@
-[← 2. Domain 2: Configuration Management and IaC (17%)](02-config-mgmt-iac.md) | [🏠 Home](README.md) | [4. Domain 4: Monitoring and Logging (15%) →](04-monitoring-logging.md)
+[← 2. Domain 2: Configuration Management and IaC (17%)](02-config-mgmt-iac.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [4. Domain 4: Monitoring and Logging (15%) →](04-monitoring-logging.md)
 
 # Chapter 3 - Domain 3: Resilient Cloud Solutions (15%)
 
 > High availability, scaling and disaster recovery. Questions give you RTO/RPO numbers or a business requirement and ask for the cheapest design that meets it.
+
+## Services to study for this domain
+
+Read these service files first, then the sections below.
+
+- [Amazon ECS, EKS and Fargate](services/ecs-eks.md)
+- [AWS Lambda deployments](services/lambda.md)
+- [Amazon API Gateway](services/api-gateway.md)
+- [Amazon EC2 Auto Scaling](services/ec2-auto-scaling.md)
+- [Elastic Load Balancing and compute high availability](services/elastic-load-balancing.md)
+- [Amazon S3 (events, integrity, protection)](services/s3.md)
+- [Databases and storage: HA and replication](services/databases-storage.md)
+- [Amazon Route 53](services/route53.md)
+- [CloudFront and Global Accelerator](services/cloudfront-global-accelerator.md)
+- [AWS Backup](services/aws-backup.md)
+- [Resilience Hub, FIS and Elastic Disaster Recovery](services/resilience-hub-fis-drs.md)
+- [SQS, SNS, Kinesis, Firehose and Lambda event handling](services/sqs-sns-kinesis.md)
 
 ## 3.1 Core vocabulary
 
@@ -39,93 +56,7 @@ Tie-breakers:
 - "Must serve traffic immediately at lower capacity" -> warm standby.
 - "Most cost-effective and RTO of 24 hours is fine" -> backup and restore.
 
-**AWS Elastic Disaster Recovery (DRS)**: continuous block-level replication of servers (on-prem, other cloud, EC2) to a low-cost staging area in AWS; launch recovery instances in minutes (RPO seconds, RTO minutes); failback supported; non-disruptive **drills**. Pick it for "lift-and-shift servers DR with minimal RPO and low cost".
-
-**AWS Resilience Hub**: define the app (from CFN/ Terraform/ Resource groups/ EKS), set RTO/RPO **resiliency policy**, it **assesses** whether the architecture meets them, recommends fixes, generates CloudWatch alarms, SOPs (SSM docs) and **FIS experiments**. Runs in pipelines for continuous assessment.
-
-**AWS Fault Injection Service (FIS)**: chaos engineering. Experiment templates with actions (stop/terminate EC2, throttle API, inject CPU stress via SSM, fail AZ power interruption scenario, Aurora/RDS failover, ECS/EKS task kill, network disruption) with **stop conditions** = CloudWatch alarms. Use to **test** resilience and DR runbooks.
-
-## 3.3 Multi-AZ / multi-Region by service
-
-### Compute and load balancing
-
-| Service | HA mechanism |
-|---|---|
-| EC2 | ASG across **multiple AZs** behind a load balancer. Single instance = SPOF. EC2 **auto recovery** (CloudWatch alarm `StatusCheckFailed_System` -> recover action, keeps instance ID/IP; default simplified auto recovery for supported types) |
-| ELB | ALB/NLB nodes in each enabled AZ. **Cross-zone load balancing**: ALB always on (can turn off per target group), NLB/GWLB off by default (charges inter-AZ). Turn on to avoid uneven distribution when AZs have different instance counts |
-| ECS | Service with tasks spread across AZs (`spread` placement on `attribute:ecs.availability-zone` default for Fargate), multiple subnets |
-| EKS | Managed node groups across AZs, pod topology spread constraints, PodDisruptionBudgets |
-| Lambda | Runs in multiple AZs automatically. If in VPC, give subnets in multiple AZs |
-
-**ALB/NLB health checks + recovery from backend failure**
-- Target group health check: protocol, path (`/health`), port, healthy/unhealthy threshold, interval, timeout, success codes.
-- ALB routes only to healthy targets. If **all** targets are unhealthy, ALB **fails open** (routes to all).
-- ASG health check type **ELB** (not just EC2) so ASG **replaces** instances that fail the LB health check. Health check grace period so booting instances aren't killed.
-- **Deregistration delay** (connection draining, default 300 s) to finish in-flight requests on scale-in/deploy.
-- Route 53 health check + failover for multi-Region.
-
-### Data layer
-
-| Service | Same-Region HA | Cross-Region |
-|---|---|---|
-| **RDS** (MySQL/PG/MariaDB/Oracle/SQL Server) | **Multi-AZ instance** (sync standby, automatic failover 60-120 s, DNS endpoint stays same) or **Multi-AZ DB cluster** (1 writer + 2 readable standbys, failover ~35 s). Read replicas = scale reads (async) | **Cross-Region read replica** (async), **promote** for DR (manual, breaks replication). Automated backups **cross-Region replication**. Snapshot copy |
-| **Aurora** | Storage 6 copies across 3 AZs; up to 15 replicas; failover to replica ~30 s (set **failover priority tiers**). Reader endpoint load balances | **Aurora Global Database**: up to 10 secondary Regions (was 5 before May 2025; older questions may say 5), replication typically < 1 s, **RPO ~1 s, RTO < 1 min**. **Managed planned switchover** (no data loss, for drills) vs **failover** (unplanned, `failover-global-cluster` with allow data loss). **Write forwarding** from secondary. **Global writer endpoint** |
-| **Aurora Serverless v2** | Scales ACUs in seconds; Multi-AZ via readers | Can be part of Global Database |
-| **DynamoDB** | Multi-AZ by default | **Global tables**: multi-Region, multi-active (write anywhere), last writer wins; replication usually < 1 s. Multi-Region strong consistency option (MRSC). Needs Streams (managed). **PITR** (restore to any second in the last 1-35 days, configurable) + on-demand backups, cross-Region via AWS Backup |
-| **ElastiCache (Redis OSS / Valkey)** | Multi-AZ with auto-failover (replicas) | **Global Datastore** (cross-Region replica clusters, promote secondary) |
-| **MemoryDB** | Multi-AZ durable transaction log | Multi-Region (active-active) |
-| **S3** | 3+ AZs by default (except One Zone-IA) | **CRR** (Cross-Region Replication, needs versioning both sides; **S3 RTC** = 99.99% in 15 min SLA); **SRR** same-Region; **Multi-Region Access Points** with failover controls; replicate existing objects with **Batch Replication** |
-| **EFS** | Regional (multi-AZ) | **EFS replication** to another Region (RPO ~minutes), failover by making replica writable |
-| **EBS** | Replicated within one AZ only | **Snapshots** (incremental, stored in S3) copied cross-Region; Data Lifecycle Manager (DLM) for scheduled snapshots + cross-Region copy |
-| **Redshift** | Multi-AZ (RA3) | Cross-Region snapshot copy |
-| **DocumentDB** | Replicas across AZs | Global clusters |
-
-### DNS and edge: Route 53
-
-| Routing policy | Use |
-|---|---|
-| Simple | One record, no health checks |
-| **Failover** | Active-passive: primary record with health check, secondary used when primary unhealthy (DR) |
-| **Weighted** | Split traffic by % (blue/green, canary across Regions) |
-| **Latency** | Send users to lowest-latency Region (active-active) |
-| Geolocation | By user's country/continent (compliance, localisation). Add default record |
-| Geoproximity | By distance with bias (Traffic Flow) |
-| Multivalue answer | Up to 8 healthy records, client-side LB |
-| IP-based | By client CIDR |
-
-**Health checks**: endpoint (HTTP/HTTPS/TCP, string matching, from global checkers), **calculated** (combine child checks with AND/OR/threshold), **CloudWatch alarm-based** (for private resources - Route 53 checkers can't reach private IPs, so alarm on a metric and attach a health check to the alarm). **Evaluate target health** on alias records (ALB health propagates). **Route 53 ARC** (Application Recovery Controller): readiness checks + routing controls for highly reliable manual failover; **Region switch** for orchestrated multi-Region failover plans.
-
-### CloudFront
-- **Origin groups** with primary + secondary origin -> **origin failover** on specific HTTP error codes (500, 502, 503, 504, 403, 404) or timeouts. Good for S3 bucket in 2 Regions (with CRR).
-- Caching reduces origin load; cache behaviours per path; TTLs; invalidations.
-- **AWS Global Accelerator**: static anycast IPs, routes to healthy endpoints in multiple Regions in seconds (TCP/UDP, non-HTTP, no DNS caching problem). Choose it over Route 53 when "clients cache DNS / need static IPs / fast failover".
-
-## 3.4 Scalability
-
-### EC2 Auto Scaling (very heavily tested)
-
-**Scaling policy types**
-
-| Policy | How | Use |
-|---|---|---|
-| **Target tracking** | Keep a metric at a target (e.g., CPU 50%, `ALBRequestCountPerTarget` 1000, SQS backlog per instance) | Default best answer; ASG creates alarms for you |
-| **Step scaling** | Different adjustments for different alarm breach sizes | Big spikes need bigger jumps |
-| Simple scaling | One adjustment + cooldown | Legacy |
-| **Scheduled** | Change min/max/desired at times | Known patterns (business hours, Monday 9 AM) |
-| **Predictive scaling** | ML forecast from 14 days history, scales **ahead** of load | Recurring daily/weekly patterns, slow-boot apps. Use "forecast only" mode first |
-
-**Other must-knows**
-- **Launch templates** (versions, mixed instances) - launch configurations are legacy.
-- **Mixed instances policy**: On-Demand base + % Spot, multiple instance types, allocation strategies (`price-capacity-optimized` for Spot). **Capacity Rebalancing** replaces Spot instances at elevated interruption risk.
-- **Warm pools**: pre-initialised stopped/hibernated/running instances -> fast scale-out for apps with long boot/init time.
-- **Lifecycle hooks**: `autoscaling:EC2_INSTANCE_LAUNCHING` / `TERMINATING` -> instance waits in `Pending:Wait` / `Terminating:Wait` (heartbeat timeout default 1 h, range 30 s-2 h; extend with `RecordLifecycleActionHeartbeat`; total wait max 48 h or 100 x heartbeat, whichever is smaller) so you can install software or **copy logs before termination**. Notify via EventBridge/SNS/SQS -> Lambda / SSM Run Command, then `complete-lifecycle-action` (CONTINUE/ABANDON).
-- **Termination policies**: Default (AZ balance -> oldest launch template/config -> closest to next billing hour), OldestInstance, NewestInstance, OldestLaunchTemplate, AllocationStrategy, custom Lambda. **Instance scale-in protection** for specific instances.
-- **Suspend processes** (Launch, Terminate, HealthCheck, ReplaceUnhealthy, AZRebalance, AlarmNotification, ScheduledActions, AddToLoadBalancer, InstanceRefresh) - e.g., suspend `ReplaceUnhealthy` while debugging, `AZRebalance` to avoid churn.
-- **Standby** state: take instance out of service for troubleshooting without terminating.
-- **Instance refresh**: rolling replacement to a new launch template/AMI with min healthy %, warm-up, checkpoints, **auto rollback** on failure/alarm.
-- **Default instance warmup** so new instances' metrics don't trigger more scaling too early.
-- Health checks: EC2 (status checks) default; add **ELB** health checks; custom via `set-instance-health`.
-- Scaling metric for queue workers: **backlog per instance** = `ApproximateNumberOfMessagesVisible` / running instances (custom metric) with target tracking.
+## 3.3 Scalability
 
 ### Other auto scaling
 
@@ -150,35 +81,12 @@ Tie-breakers:
 - Stateless compute + external state (ElastiCache/DynamoDB for sessions, S3 for files).
 - **Caching**: CloudFront (edge), API Gateway cache, ElastiCache/DAX (DB), Lambda execution context.
 
-### Containers and serverless platforms (Domain 3.2)
-- **ECS** launch types: EC2 (you manage instances), **Fargate** (serverless). ECS Anywhere for on-prem. Task definitions, services, task role (app permissions) vs **task execution role** (pull ECR image, push logs, read secrets).
-- **EKS**: managed control plane; node types: managed node groups, self-managed, Fargate profiles, Auto Mode. Pod IAM: **IRSA** (OIDC provider) or **EKS Pod Identity** (simpler). Add-ons: VPC CNI, CoreDNS, kube-proxy, EBS CSI driver, ADOT.
-- **App Runner**: fully managed web apps from source/image, auto scaling, least overhead for simple web services. (Closed to new customers from Apr 30, 2026; AWS recommends ECS Express Mode now. Know the concept.)
-- **Copilot** CLI for ECS/App Runner apps with pipelines. **App2Container** containerises existing .NET/Java apps.
-- **API Gateway + Lambda + DynamoDB** = classic serverless. Use **Lambda Powertools**, X-Ray, DLQs / on-failure destinations.
-
 ### Multi-Region for global scalability
 - Deploy stacks to each Region (StackSets / pipeline with multi-Region actions).
 - Data: DynamoDB global tables, Aurora Global DB, S3 CRR, ECR replication, Secrets Manager **replica secrets**, KMS **multi-Region keys** (same key ID/material in multiple Regions - decrypt data copied across Regions without re-encrypting), AMI copy, Parameter Store (no native replication - copy via automation).
 - Route traffic: Route 53 latency/geolocation + health checks, Global Accelerator, CloudFront.
 
-## 3.5 Backup and recovery
-
-**AWS Backup**
-- **Backup plans** (schedule, lifecycle: transition to cold storage, retention), **backup rules**, **resource assignment** by tags or ARNs.
-- Supports EC2/EBS, RDS, Aurora, DynamoDB, EFS, FSx, S3, Storage Gateway, DocumentDB, Neptune, Redshift, Timestream, SAP HANA on EC2, VMware...
-- **Cross-Region copy** and **cross-account copy** (within org) in the plan's copy action.
-- **Vault Lock** (WORM: governance or compliance mode) - backups can't be deleted even by root -> ransomware protection. **Logically air-gapped vault**.
-- **Organization backup policies** to apply plans to all accounts.
-- **Backup Audit Manager** frameworks/controls for compliance reports.
-- **Restore testing** plans (automatic periodic restore validation).
-- EventBridge events for job state (failed backups -> SNS).
-
-**Service-native backups:** RDS automated backups (1-35 days, PITR to 5-min granularity) + manual snapshots (kept until deleted); DynamoDB PITR; EBS snapshots with DLM; S3 versioning + Object Lock + replication; Aurora **Backtrack** (MySQL, rewind in place without restore).
-
-**Recovery procedures (automate them):** SSM Automation runbooks to restore/promote, CFN templates for DR stack, Route 53 ARC / failover records, regular **DR drills** with FIS / Aurora switchover / DRS drills.
-
-## 3.6 Domain 3 scenario quick-map
+## 3.4 Domain 3 scenario quick-map
 
 | Scenario | Answer |
 |---|---|
@@ -208,4 +116,4 @@ Tie-breakers:
 
 ---
 
-[← 2. Domain 2: Configuration Management and IaC (17%)](02-config-mgmt-iac.md) | [🏠 Home](README.md) | [4. Domain 4: Monitoring and Logging (15%) →](04-monitoring-logging.md)
+[← 2. Domain 2: Configuration Management and IaC (17%)](02-config-mgmt-iac.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [4. Domain 4: Monitoring and Logging (15%) →](04-monitoring-logging.md)

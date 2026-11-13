@@ -1,4 +1,4 @@
-[← 8. 60 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [10. Hands-on labs →](10-hands-on-labs.md)
+[← 8. 60 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [10. Hands-on labs →](10-hands-on-labs.md)
 
 # Chapter 9 - 46-Day Study Plan (Nov 14 - Dec 29, 2026)
 
@@ -6,7 +6,7 @@
 
 ## 9.1 How to study each chapter (method)
 1. **Read** the chapter section once fully (don't take notes yet).
-2. **Do the lab** for that topic ([Chapter 10 - Labs](10-hands-on-labs.md)). Even 30 minutes in the console fixes a concept better than 3 re-reads.
+2. **Do the lab** for that topic ([labs folder](labs/README.md)). Even 30 minutes in the console fixes a concept better than 3 re-reads.
 3. **Cover the quick-map table** at the end of the chapter and answer each scenario from memory.
 4. **Practice questions** for that domain (Chapter 8 + your practice exam bank).
 5. For every wrong answer, write one line in a **[mistakes log](mistakes-log.md)**: *the trap -> the rule*. Re-read the log every morning.
@@ -16,45 +16,45 @@
 ### Week 1 (Nov 14-20): Exam strategy + Domain 1 SDLC (22%)
 | Day | Date | Topics | Lab |
 |---|---|---|---|
-| 1 | Sat Nov 14 | Ch 0 (strategy). Take the **free official practice question set** on Skill Builder as a baseline. Ch 1.1-1.3 (pipeline concepts, CodeCommit, CodeBuild) | [L1](10-hands-on-labs.md) |
-| 2 | Sun Nov 15 | Ch 1.4-1.6 (artifacts, Image Builder, CodePipeline incl. cross-account) | [L2](10-hands-on-labs.md) |
-| 3 | Mon Nov 16 | Ch 1.7 CodeDeploy: AppSpec, hooks order, configs | [L3](10-hands-on-labs.md) |
-| 4 | Tue Nov 17 | Ch 1.7 cont.: agent, rollbacks, troubleshooting table. Memorise the hook order | - |
-| 5 | Wed Nov 18 | Ch 1.8 deployment strategies: Beanstalk policies, ECS, Lambda/SAM, API GW | [L4](10-hands-on-labs.md) |
-| 6 | Thu Nov 19 | Ch 1.9-1.10 secrets + quick-map. Q1-Q12 | - |
+| 1 | Sat Nov 14 | [Ch 0](00-exam-strategy.md) strategy. Take the **free official practice question set** on Skill Builder as a baseline. [Ch 1](01-sdlc-automation.md) big picture, [CodeCommit](services/codecommit.md), [CodeBuild](services/codebuild.md) | [Lab 01](labs/01-codebuild-codepipeline/README.md) steps 1-4 |
+| 2 | Sun Nov 15 | [CodePipeline](services/codepipeline.md) (incl. cross-account), [CodeArtifact](services/codeartifact.md), [ECR](services/ecr.md), [Image Builder](services/ec2-image-builder.md), [Amplify](services/amplify.md) | [Lab 01](labs/01-codebuild-codepipeline/README.md) steps 5-7, [Lab 04](labs/04-ecs-circuit-breaker/README.md) step 3 |
+| 3 | Mon Nov 16 | [CodeDeploy](services/codedeploy.md): AppSpec, hook order, configs | [Lab 02](labs/02-codedeploy-ec2-rollback/README.md) |
+| 4 | Tue Nov 17 | [CodeDeploy](services/codedeploy.md) again: agent, rollbacks, troubleshooting. Memorise the hook order | - |
+| 5 | Wed Nov 18 | [Ch 1](01-sdlc-automation.md) deployment strategies, [Elastic Beanstalk](services/elastic-beanstalk.md), [ECS/EKS](services/ecs-eks.md), [Lambda](services/lambda.md), [API Gateway](services/api-gateway.md) | [Lab 03](labs/03-sam-lambda-canary/README.md), [Lab 04](labs/04-ecs-circuit-breaker/README.md) |
+| 6 | Thu Nov 19 | [Secrets](services/secrets-manager-parameter-store.md) + Domain 1 quick-map. Q1-Q12 | - |
 | 7 | Fri Nov 20 | Domain 1 practice set (30+ questions from your bank). Mistakes log | - |
 
 ### Week 2 (Nov 21-27): Domain 2 Configuration Management and IaC (17%)
 | Day | Date | Topics | Lab |
 |---|---|---|---|
-| 8 | Sat Nov 21 | Ch 2.1-2.2 CloudFormation: template, functions, dynamic refs, stack lifecycle tools | [L5](10-hands-on-labs.md) |
-| 9 | Sun Nov 22 | Ch 2.2 cont.: helper scripts, CreationPolicy, UpdatePolicy, multi-stack, StackSets, custom resources, Hooks, errors | [L6](10-hands-on-labs.md) |
-| 10 | Mon Nov 23 | Ch 2.3 SAM + CDK; Ch 2.4 AppConfig | [L7](10-hands-on-labs.md) |
-| 11 | Tue Nov 24 | Ch 2.5 Systems Manager (all capabilities) | [L8](10-hands-on-labs.md) |
-| 12 | Wed Nov 25 | Ch 2.6-2.7 Organizations, SCPs, Control Tower | - |
-| 13 | Thu Nov 26 | Ch 2.8-2.11 Config, Service Catalog, Step Functions, quick-map. Q13-Q24 | [L9](10-hands-on-labs.md) |
+| 8 | Sat Nov 21 | [CloudFormation](services/cloudformation.md) part 1: template, functions, dynamic refs, stack lifecycle tools | [Lab 05](labs/05-cloudformation-signals-changesets-drift/README.md) |
+| 9 | Sun Nov 22 | [CloudFormation](services/cloudformation.md) part 2: helper scripts, UpdatePolicy, multi-stack, StackSets, custom resources, hooks, errors | [Lab 06](labs/06-stacksets-multi-region/README.md) |
+| 10 | Mon Nov 23 | [SAM and CDK](services/sam-cdk.md), [AppConfig](services/appconfig.md), [Step Functions](services/step-functions.md), [Ch 2](02-config-mgmt-iac.md) | - |
+| 11 | Tue Nov 24 | [Systems Manager](services/systems-manager.md) (all capabilities) | [Lab 07](labs/07-systems-manager-fleet/README.md) |
+| 12 | Wed Nov 25 | [Organizations and SCPs](services/organizations.md), [Control Tower](services/control-tower.md) | [Lab 15](labs/15-organizations-scp/README.md) (optional) |
+| 13 | Thu Nov 26 | [AWS Config](services/config.md), [Service Catalog](services/service-catalog.md), Domain 2 quick-map. Q13-Q24 | [Lab 08](labs/08-config-auto-remediation/README.md) |
 | 14 | Fri Nov 27 | Domain 2 practice set. Re-read mistakes log for D1 + D2 | - |
 
 ### Week 3 (Nov 28 - Dec 4): Domain 3 Resilience (15%) + Domain 4 Monitoring (15%)
 | Day | Date | Topics | Lab |
 |---|---|---|---|
-| 15 | Sat Nov 28 | Ch 3.1-3.3 DR strategies, Multi-AZ/multi-Region per service, Route 53, CloudFront, Global Accelerator | [L10](10-hands-on-labs.md) |
-| 16 | Sun Nov 29 | Ch 3.4-3.6 Auto Scaling deep dive, other scaling, decoupling, backups. Q25-Q35 | [L11](10-hands-on-labs.md) |
+| 15 | Sat Nov 28 | [Ch 3](03-resilient-cloud.md) DR strategies, [Databases and storage](services/databases-storage.md), [S3](services/s3.md), [Route 53](services/route53.md), [CloudFront/GA](services/cloudfront-global-accelerator.md) | [Lab 16](labs/16-multi-region-dr/README.md) |
+| 16 | Sun Nov 29 | [Auto Scaling](services/ec2-auto-scaling.md), [ELB](services/elastic-load-balancing.md), [AWS Backup](services/aws-backup.md), [Resilience Hub/FIS/DRS](services/resilience-hub-fis-drs.md). Q25-Q35 | [Lab 12](labs/12-auto-scaling-lifecycle-hooks/README.md) |
 | 17 | Mon Nov 30 | Domain 3 practice set | - |
-| 18 | Tue Dec 1 | Ch 4.1-4.3 metrics, alarms, Logs, filter syntax, Logs Insights, real-time pipelines | [L12](10-hands-on-labs.md) |
-| 19 | Wed Dec 2 | Ch 4.4-4.7 CloudWatch agent, dashboards, X-Ray, Synthetics | [L13](10-hands-on-labs.md) |
-| 20 | Thu Dec 3 | Ch 4.8-4.12 CloudTrail, other logs, log security/lifecycle, quick-map. Q36-Q45 | - |
+| 18 | Tue Dec 1 | [CloudWatch](services/cloudwatch.md): metrics, alarms, Logs, filter syntax, Logs Insights, agent | [Lab 09](labs/09-cloudwatch-logs-alarms/README.md) |
+| 19 | Wed Dec 2 | [X-Ray](services/xray.md), CloudWatch Synthetics, [Athena/Glue/QuickSight](services/analytics-athena-glue-quicksight.md) | [Lab 10](labs/10-xray-api-gateway-lambda/README.md) |
+| 20 | Thu Dec 3 | [CloudTrail](services/cloudtrail.md), [Ch 4](04-monitoring-logging.md) other logs, log security, quick-map. Q36-Q45 | - |
 | 21 | Fri Dec 4 | Domain 4 practice set | - |
 
 ### Week 4 (Dec 5-11): Domain 5 Incident (14%) + Domain 6 Security (17%)
 | Day | Date | Topics | Lab |
 |---|---|---|---|
-| 22 | Sat Dec 5 | Ch 5.1-5.3 EventBridge, Health, SQS/SNS/Kinesis/Lambda failure handling | [L14](10-hands-on-labs.md) |
-| 23 | Sun Dec 6 | Ch 5.4-5.7 auto-remediation, troubleshooting tables, quick-map. Q46-Q54 | [L15](10-hands-on-labs.md) |
-| 24 | Mon Dec 7 | Ch 6.1 IAM (evaluation logic, conditions, ABAC, boundaries, STS) | [L16](10-hands-on-labs.md) |
-| 25 | Tue Dec 8 | Ch 6.2-6.3 secrets, KMS, CloudHSM, ACM, Macie | - |
-| 26 | Wed Dec 9 | Ch 6.4-6.5 network security, detection services | [L17](10-hands-on-labs.md) |
-| 27 | Thu Dec 10 | Ch 6.6-6.7 security at scale, quick-map. Q55-Q60 | - |
+| 22 | Sat Dec 5 | [EventBridge](services/eventbridge.md), [Health](services/health.md), [SQS/SNS/Kinesis](services/sqs-sns-kinesis.md) | [Lab 11](labs/11-eventbridge-sqs-dlq/README.md) |
+| 23 | Sun Dec 6 | [Ch 5](05-incident-event-response.md) auto-remediation, troubleshooting tables, quick-map. Q46-Q54 | [Lab 04](labs/04-ecs-circuit-breaker/README.md) step 2, [Lab 05](labs/05-cloudformation-signals-changesets-drift/README.md) step 2 |
+| 24 | Mon Dec 7 | [IAM, STS, Identity Center](services/iam-sts-identity-center.md) | [Lab 13](labs/13-iam-boundary-abac/README.md) |
+| 25 | Tue Dec 8 | [KMS/CloudHSM](services/kms-cloudhsm.md), [ACM](services/acm.md), [Secrets Manager](services/secrets-manager-parameter-store.md) | - |
+| 26 | Wed Dec 9 | [Network security](services/network-security.md), [Detection services](services/security-detection.md) | [Lab 14](labs/14-guardduty-security-response/README.md) |
+| 27 | Thu Dec 10 | [Ch 6](06-security-compliance.md) threats/controls, security at scale, quick-map. Q55-Q60 | - |
 | 28 | Fri Dec 11 | Domain 5 + 6 practice sets | - |
 
 ### Week 5 (Dec 12-18): Consolidate + first full mocks
@@ -63,7 +63,7 @@
 | 29 | Sat Dec 12 | **Full mock exam 1** (75 Q, 180 min, timed, no notes). Review **all** explanations (3 h) |
 | 30 | Sun Dec 13 | Ch 7 comparisons + numbers. Re-study the weakest domain from mock 1 |
 | 31 | Mon Dec 14 | Re-study 2nd weakest domain. Redo Chapter 8 questions you got wrong |
-| 32 | Tue Dec 15 | CloudFormation + CodeDeploy + SSM revision (highest-frequency services) |
+| 32 | Tue Dec 15 | [CloudFormation](services/cloudformation.md) + [CodeDeploy](services/codedeploy.md) + [SSM](services/systems-manager.md) revision (highest-frequency services) |
 | 33 | Wed Dec 16 | Security + Organizations/Control Tower revision |
 | 34 | Thu Dec 17 | Monitoring + EventBridge patterns revision |
 | 35 | Fri Dec 18 | 40-question timed domain-mixed set |
@@ -98,4 +98,4 @@
 
 ---
 
-[← 8. 60 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [10. Hands-on labs →](10-hands-on-labs.md)
+[← 8. 60 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [10. Hands-on labs →](10-hands-on-labs.md)

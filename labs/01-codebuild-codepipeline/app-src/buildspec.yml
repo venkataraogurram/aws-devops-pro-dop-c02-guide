@@ -1,0 +1,34 @@
+version: 0.2
+
+env:
+  parameter-store:
+    GREETING: /dop-lab01/greeting      # resolved at build start; the build role needs ssm:GetParameters
+  exported-variables:
+    - APP_VERSION                      # becomes #{BuildVariables.APP_VERSION} in the pipeline
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - pip install --quiet pytest
+  pre_build:
+    commands:
+      - echo "Greeting from Parameter Store is $GREETING"
+      - export APP_VERSION="1.0.${CODEBUILD_BUILD_NUMBER}"
+  build:
+    commands:
+      - python -m pytest tests --junitxml=reports/junit.xml   # non-zero exit = build fails
+  post_build:
+    commands:
+      - echo "CODEBUILD_BUILD_SUCCEEDING=$CODEBUILD_BUILD_SUCCEEDING (post_build runs even if build failed)"
+
+reports:
+  unit-tests:                          # report group becomes dop-lab01-build-unit-tests
+    files: [junit.xml]
+    base-directory: reports
+    file-format: JUNITXML
+
+artifacts:
+  files:
+    - app/**/*

@@ -1,0 +1,109 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 08 - Config managed rule restricted-ssh with automatic SSM Automation remediation and alerts
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  NotificationEmail:
+    Type: String
+
+Resources:
+  TestSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Lab 08 test group - not attached to anything
+      VpcId: !Ref VpcId
+      Tags: [{ Key: Name, Value: dop-lab08-test }]
+
+  RestrictedSshRule:
+    Type: AWS::Config::ConfigRule
+    Properties:
+      ConfigRuleName: dop-lab08-restricted-ssh
+      Description: Security groups must not allow SSH (22) from 0.0.0.0/0
+      Source:
+        Owner: AWS
+        SourceIdentifier: INCOMING_SSH_DISABLED     # the "restricted-ssh" managed rule
+      Scope:
+        ComplianceResourceTypes: [AWS::EC2::SecurityGroup]
+
+  RemediationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ssm.amazonaws.com }
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals: { aws:SourceAccount: !Ref AWS::AccountId }
+      Policies:
+        - PolicyName: fix-security-groups
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [ec2:DescribeSecurityGroups, ec2:RevokeSecurityGroupIngress]
+                Resource: "*"
+
+  Remediation:
+    Type: AWS::Config::RemediationConfiguration
+    Properties:
+      ConfigRuleName: !Ref RestrictedSshRule
+      TargetType: SSM_DOCUMENT
+      TargetId: AWS-DisablePublicAccessForSecurityGroup    # AWS-owned runbook: removes 0.0.0.0/0 / ::/0 rules on ports 22 and 3389
+      Automatic: true
+      MaximumAutomaticAttempts: 3
+      RetryAttemptSeconds: 60
+      Parameters:
+        AutomationAssumeRole:
+          StaticValue:
+            Values: [!GetAtt RemediationRole.Arn]
+        GroupId:
+          ResourceValue:
+            Value: RESOURCE_ID
+
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref NotificationEmail
+
+  TopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: [!Ref Topic]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: events.amazonaws.com }
+            Action: sns:Publish
+            Resource: !Ref Topic
+            Condition:
+              StringEquals: { aws:SourceAccount: !Ref AWS::AccountId }
+
+  ComplianceChangeRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Email when a resource becomes NON_COMPLIANT with the lab rule
+      EventPattern:
+        source: [aws.config]
+        detail-type: [Config Rules Compliance Change]
+        detail:
+          configRuleName: [!Ref RestrictedSshRule]
+          newEvaluationResult:
+            complianceType: [NON_COMPLIANT]
+      Targets:
+        - Id: sns
+          Arn: !Ref Topic
+          InputTransformer:
+            InputPathsMap:
+              res: $.detail.resourceId
+              rule: $.detail.configRuleName
+            InputTemplate: '"<res> is NON_COMPLIANT with <rule>. Automatic remediation will run."'
+
+Outputs:
+  TestSecurityGroupId:
+    Value: !Ref TestSG

@@ -1,4 +1,4 @@
-[← 10. Hands-on labs](10-hands-on-labs.md) | [🏠 Home](README.md)
+[← 10. Hands-on labs](10-hands-on-labs.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md)
 
 # Chapter 11 - Final Cheat Sheet (read on Dec 28 and the morning of Dec 29)
 
@@ -126,4 +126,4 @@
 
 ---
 
-[← 10. Hands-on labs](10-hands-on-labs.md) | [🏠 Home](README.md)
+[← 10. Hands-on labs](10-hands-on-labs.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md)

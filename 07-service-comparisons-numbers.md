@@ -1,4 +1,4 @@
-[← 6. Domain 6: Security and Compliance (17%)](06-security-compliance.md) | [🏠 Home](README.md) | [8. 60 practice questions →](08-practice-questions.md)
+[← 6. Domain 6: Security and Compliance (17%)](06-security-compliance.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [8. 60 practice questions →](08-practice-questions.md)
 
 # Chapter 7 - "Which one?" Comparisons and Numbers to Memorise
 
@@ -141,4 +141,4 @@
 
 ---
 
-[← 6. Domain 6: Security and Compliance (17%)](06-security-compliance.md) | [🏠 Home](README.md) | [8. 60 practice questions →](08-practice-questions.md)
+[← 6. Domain 6: Security and Compliance (17%)](06-security-compliance.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [8. 60 practice questions →](08-practice-questions.md)
