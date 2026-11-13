@@ -49,7 +49,6 @@
 ## Hybrid and edge
 - **Hybrid activation** for on-premises servers/VMs: create an activation (code + ID, with an IAM service role), install SSM Agent, register. Nodes show as `mi-...`.
 - **Automate activations**: for many servers, a Lambda or script creates activations on demand (e.g., called from the server's bootstrap) and stores codes in Parameter Store/Secrets Manager.
-- **IoT Greengrass** core devices can be managed by SSM through the Greengrass Systems Manager Agent component.
 
 ## OpsCenter example: clean up old EBS volumes
 EventBridge schedule -> Lambda lists unattached EBS volumes older than N days -> creates **OpsItems** -> an operator (or automation) runs the `AWS-CreateSnapshot` / `AWS-DeleteSnapshot` (or delete volume) runbook from the OpsItem. Good example of "central operational work + runbooks + cost saving".

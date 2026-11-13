@@ -1,4 +1,4 @@
-[← AWS Amplify (web and mobile app hosting)](amplify.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Amazon ECS, EKS and Fargate →](ecs-eks.md)
+[← EC2 Image Builder](ec2-image-builder.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Amazon ECS, EKS and Fargate →](ecs-eks.md)
 
 # AWS Elastic Beanstalk
 
@@ -32,4 +32,4 @@ Other Beanstalk must-knows:
 
 ---
 
-[← AWS Amplify (web and mobile app hosting)](amplify.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Amazon ECS, EKS and Fargate →](ecs-eks.md)
+[← EC2 Image Builder](ec2-image-builder.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Amazon ECS, EKS and Fargate →](ecs-eks.md)

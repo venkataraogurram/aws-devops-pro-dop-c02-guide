@@ -42,7 +42,7 @@ Read these service files first, then the sections below.
 - **SSM Automation** multi-account/multi-Region remediation; **Quick Setup** org configs.
 - **Config conformance packs (org)** + **aggregator**.
 - **Firewall Manager** for WAF/SG/Network Firewall policies everywhere.
-- Pipeline security: **CodeGuru Reviewer/Security** (code scanning), **Inspector** (images, Lambda), Access Analyzer policy checks, **cfn-guard/cfn-lint/cfn-nag**, secrets scanning, signed artifacts (AWS Signer for Lambda code signing).
+- Pipeline security: **CodeGuru Reviewer/Security** (code scanning), **Inspector** (images, Lambda), Access Analyzer policy checks, **cfn-guard/cfn-lint/cfn-nag**, secrets scanning.
 
 ## 6.3 Domain 6 scenario quick-map
 
@@ -74,8 +74,6 @@ Read these service files first, then the sections below.
 | Block one malicious IP fast at subnet | NACL deny rule (or WAF IP set if web) |
 | Egress allow-list of domains | Network Firewall domain list (or DNS Firewall) |
 | Same WAF rules in every account | Firewall Manager |
-| Auditor needs AWS SOC 2 report | AWS Artifact |
-| Continuous audit evidence collection | Audit Manager |
 
 ---
 

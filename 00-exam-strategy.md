@@ -32,6 +32,17 @@ Domains 1 + 2 + 6 = 56% of the exam. CodePipeline/CodeBuild/CodeDeploy, CloudFor
 
 Non-native English speakers can request the **"ESL +30 minutes"** accommodation in your AWS Certification account (Certmetrics > Request Exam Accommodations). That turns 180 minutes into 210. Request it before the exam. If your exam is already scheduled when it is approved, check whether the extra time is applied to the existing booking; if not, reschedule the same slot so the accommodation attaches. Verify this yourself in the portal, the rules may change.
 
+### What is NOT on the exam (from the official guide)
+The guide says the target candidate is **not** expected to:
+- have advanced networking knowledge (advanced routing algorithms, failover techniques);
+- give deep-level security recommendations to developers;
+- design, query or tune the performance of databases;
+- develop full-stack application code.
+
+So this repo covers networking and databases only as far as DevOps questions need them: high availability, replication, failover, backups, scaling, security groups/NACLs. It doesn't cover routing protocols, SQL tuning or application code.
+
+**How this repo decides what to keep:** a topic stays if it is on the official in-scope services list, is named in a task statement, or is in the "Technologies and Concepts" list. One exception: a non-listed service stays as a short note if it regularly appears as an answer option in DOP-C02 style questions (**Global Accelerator**, **Firewall Manager**, and the Glue Data Catalog behind Athena tables).
+
 ## 0.2 How DOP-C02 questions are written
 
 - Long scenarios (5-10 lines), 4-5 long answer options that differ in 1-2 words.
@@ -44,7 +55,7 @@ Non-native English speakers can request the **"ESL +30 minutes"** accommodation 
 | "MINIMUM downtime" / "zero downtime" | Blue/green, immutable, traffic shifting, Route 53 weighted, CNAME swap |
 | "As quickly as possible" / "fastest recovery" | Already-running resources (warm standby, multi-site, Aurora Global DB) |
 | "Near real time" | EventBridge, Kinesis, CloudWatch Logs subscription filters (not S3 export, not CloudTrail to S3 + Athena) |
-| "Must be auditable" / "prove" | CloudTrail (with log file validation), AWS Config history, Audit Manager |
+| "Must be auditable" / "prove" | CloudTrail (with log file validation), AWS Config history |
 | "Prevent" | SCP / RCP, IAM deny, Control Tower preventive control, permission boundary, CFN Hook, stack policy |
 | "Detect" | AWS Config rule, GuardDuty, Security Hub, Access Analyzer, Control Tower detective control |
 | "Automatically remediate" | Config rule + SSM Automation remediation, or EventBridge rule + Lambda / SSM Automation |

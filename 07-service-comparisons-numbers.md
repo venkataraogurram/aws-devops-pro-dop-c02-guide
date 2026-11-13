@@ -65,7 +65,6 @@
 | Logs Insights | Athena | Query CloudWatch Logs | Query S3 data (CloudTrail, ALB, VPC flow logs in S3) |
 | CloudWatch dashboards | QuickSight | Ops metrics | BI / business analytics from Athena/S3 |
 | CloudTrail Lake | Athena on CloudTrail S3 | Managed SQL over events, no table setup | You already have logs in S3, cheapest |
-| Synthetics | RUM | Scripted probes 24x7 | Real users' browser experience |
 | AppConfig | Parameter Store | Validated, gradual config/feature flag rollout with rollback | Simple config storage |
 | CodeArtifact | ECR | Language packages (npm, pip, Maven) | Container images |
 | Image Builder | Packer on EC2 | Managed AMI/container pipeline (exam answer) | Only if question requires Packer |

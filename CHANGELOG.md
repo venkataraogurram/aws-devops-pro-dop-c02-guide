@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.1 - 2026-11-13
+- Scope audit against the official exam guide (in-scope services list, task statements, Technologies and Concepts, out-of-scope tasks). Added a "What is NOT on the exam" section and the keep/cut rule to Chapter 0.
+- Removed services that are not in scope: Amplify (file deleted), Audit Manager, AWS Artifact, DevOps Guru, CloudWatch RUM / Internet Monitor / Evidently / Application Signals / Investigations, Managed Service for Apache Flink, MSK, Route 53 ARC, Verified Access, Nitro Enclaves, AWS Signer, IoT Greengrass, CodePipeline Device Farm/Jenkins providers, non-listed Application Auto Scaling targets.
+- Removed features with no exam value (released after the exam content, or not tested): S3 Files volumes, Lambda SnapStart, ALB dual-stack, CloudWatch Logs field indexes, Backup Audit Manager.
+- Cut database depth the guide lists as out of scope (ElastiCache data types/endpoints, DynamoDB item limits, DMS metric names). Glue reduced to the Data Catalog note needed for Athena (file renamed to analytics-athena-quicksight.md).
+- Kept briefly, with a note, because they appear as answer options: Global Accelerator, Firewall Manager.
+
 ## v2.0 - 2026-11-13
 - New `services/` folder: 42 service files. Service content moved out of the domain chapters (one place per fact). Domain chapters now list the services to study and keep the cross-service sections and quick-maps.
 - New `labs/` folder: 16 step-by-step labs with CloudFormation/SAM templates (all pass cfn-lint), code, expected output, "break it" steps, exam takeaways and cleanup. Written but not run end to end.

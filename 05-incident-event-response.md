@@ -58,7 +58,7 @@ Common automated remediations:
 ## 5.2 Troubleshooting (Task 5.3) - systematic approach
 
 **Root cause analysis tools**
-- **CloudWatch** metrics/alarms/dashboards, **Logs Insights**, **X-Ray** service map (find the slow/failing hop), **CloudTrail** (who changed what), **AWS Config** timeline (what config changed), **Health Dashboard** (is it AWS?), **SSM OpsCenter** (OpsItems with related resources and runbooks), **DevOps Guru** (ML-detected operational anomalies with recommendations), **CloudWatch Investigations** (AI-assisted).
+- **CloudWatch** metrics/alarms/dashboards, **Logs Insights**, **X-Ray** service map (find the slow/failing hop), **CloudTrail** (who changed what), **AWS Config** timeline (what config changed), **Health Dashboard** (is it AWS?), **SSM OpsCenter** (OpsItems with related resources and runbooks).
 
 ### Failed deployments: where to look
 
@@ -118,7 +118,6 @@ Common automated remediations:
 | CloudFormation failed - find cause | First FAILED event in stack events |
 | ECS task CannotPullContainerError in private subnet | VPC endpoints for ECR (api + dkr) + S3 gateway, or NAT; execution role ECR permissions |
 | ASG instances terminated before app starts | Health check grace period / lifecycle hook |
-| ML detection of operational anomalies | Amazon DevOps Guru |
 
 ---
 

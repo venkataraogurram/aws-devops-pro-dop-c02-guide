@@ -19,7 +19,7 @@
 | Multivalue answer | Up to 8 healthy records, client-side LB |
 | IP-based | By client CIDR |
 
-**Health checks**: endpoint (HTTP/HTTPS/TCP, string matching, from global checkers), **calculated** (combine child checks with AND/OR/threshold), **CloudWatch alarm-based** (for private resources - Route 53 checkers can't reach private IPs, so alarm on a metric and attach a health check to the alarm). **Evaluate target health** on alias records (ALB health propagates). **Route 53 ARC** (Application Recovery Controller): readiness checks + routing controls for highly reliable manual failover; **Region switch** for orchestrated multi-Region failover plans.
+**Health checks**: endpoint (HTTP/HTTPS/TCP, string matching, from global checkers), **calculated** (combine child checks with AND/OR/threshold), **CloudWatch alarm-based** (for private resources - Route 53 checkers can't reach private IPs, so alarm on a metric and attach a health check to the alarm). **Evaluate target health** on alias records (ALB health propagates).
 
 ## Records and hosted zones
 - Record types to know: **A** (IPv4), **AAAA** (IPv6), **CNAME** (name -> name, not allowed at the zone apex), **NS**, and **Alias** (Route 53 extension: points to AWS resources such as ALB, CloudFront, S3 website, API Gateway; works at the apex; free queries; can evaluate target health).

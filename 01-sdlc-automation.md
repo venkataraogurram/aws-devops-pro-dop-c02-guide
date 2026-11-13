@@ -15,7 +15,6 @@ Read these service files first, then the sections below.
 - [AWS CodeArtifact](services/codeartifact.md)
 - [Amazon ECR](services/ecr.md)
 - [EC2 Image Builder](services/ec2-image-builder.md)
-- [AWS Amplify (web and mobile app hosting)](services/amplify.md)
 - [AWS Elastic Beanstalk](services/elastic-beanstalk.md)
 - [Amazon ECS, EKS and Fargate](services/ecs-eks.md)
 - [AWS Lambda deployments](services/lambda.md)

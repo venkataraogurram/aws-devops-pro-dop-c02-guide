@@ -1,6 +1,6 @@
 # AWS Certified DevOps Engineer - Professional (DOP-C02) Study Guide
 
-**Version:** v2.0 (Nov 2026) | **Exam:** Tue, Dec 29, 2026
+**Version:** v2.1 (Nov 2026) | **Exam:** Tue, Dec 29, 2026
 
 Complete DOP-C02 material in one repo:
 - **service notes**, one file per service;
@@ -22,7 +22,7 @@ Built from the official [DOP-C02 exam guide](https://docs.aws.amazon.com/aws-cer
 ## Repo layout
 | Folder / file | What's inside |
 |---|---|
-| [services/](services/README.md) | 42 service files grouped by area (CI/CD, compute, IaC, governance, resilience, monitoring, security) |
+| [services/](services/README.md) | 41 service files grouped by area (CI/CD, compute, IaC, governance, resilience, monitoring, security) |
 | `00`-`11` chapters | Strategy, 6 domain chapters, comparisons, practice questions, plan, labs index, cheat sheet |
 | [labs/](labs/README.md) | 16 practical labs: CloudFormation/SAM templates, code, CLI steps, "break it" exercises, cleanup |
 | [mistakes-log.md](mistakes-log.md) | Your personal trap -> rule log |

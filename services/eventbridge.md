@@ -36,7 +36,7 @@ flowchart LR
 | **Retry + DLQ** | Retries up to 24 h / 185 attempts by default; configure **SQS dead-letter queue** per target for failed deliveries |
 | **Archive and replay** | Store events, replay later (testing, recovery) |
 | **Schema registry** | Discover event schemas, generate code bindings |
-| **Pipes** | Point-to-point source (SQS, Kinesis, DynamoDB Streams, MSK...) -> filter -> enrich (Lambda/Step Functions/API) -> target |
+| **Pipes** | Point-to-point source (SQS, Kinesis, DynamoDB Streams) -> filter -> enrich (Lambda/Step Functions/API) -> target |
 | **Scheduler** | Cron/rate/one-time schedules at large scale, time zones, flexible windows, retries/DLQ. Preferred over scheduled rules |
 | **API destinations** | HTTP endpoints with connection auth (Slack, PagerDuty, ServiceNow) |
 

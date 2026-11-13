@@ -1,4 +1,4 @@
-[← Athena, Glue and QuickSight (log analytics)](analytics-athena-glue-quicksight.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Secrets Manager and Parameter Store →](secrets-manager-parameter-store.md)
+[← Athena and QuickSight (log analytics)](analytics-athena-quicksight.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Secrets Manager and Parameter Store →](secrets-manager-parameter-store.md)
 
 # IAM, STS and IAM Identity Center
 
@@ -105,4 +105,4 @@ flowchart TD
 
 ---
 
-[← Athena, Glue and QuickSight (log analytics)](analytics-athena-glue-quicksight.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Secrets Manager and Parameter Store →](secrets-manager-parameter-store.md)
+[← Athena and QuickSight (log analytics)](analytics-athena-quicksight.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Secrets Manager and Parameter Store →](secrets-manager-parameter-store.md)

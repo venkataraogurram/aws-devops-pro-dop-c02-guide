@@ -4,6 +4,8 @@
 
 One file per service: concepts, must-know facts, YAML/JSON samples, traps. This is the main study material. The domain chapters (01-06) say what each exam domain tests, link here, and hold the cross-service "scenario → answer" tables.
 
+**Scope:** every file covers a service from the official DOP-C02 in-scope list or task statements, at the depth the exam asks. Two services not on the list are kept briefly because they show up as answer options: Global Accelerator (in the CloudFront file) and Firewall Manager (in Network security). See [Chapter 0](../00-exam-strategy.md) for the rule.
+
 ## Developer tools (CI/CD)
 
 | Service | Exam domains | Hands-on lab |
@@ -15,7 +17,6 @@ One file per service: concepts, must-know facts, YAML/JSON samples, traps. This 
 | [AWS CodeArtifact](codeartifact.md) | 1 | - |
 | [Amazon ECR](ecr.md) | 1, 6 | [04](../labs/04-ecs-circuit-breaker/README.md) |
 | [EC2 Image Builder](ec2-image-builder.md) | 1, 2 | - |
-| [AWS Amplify (web and mobile app hosting)](amplify.md) | 1 | - |
 
 ## Compute, containers and serverless
 
@@ -68,7 +69,7 @@ One file per service: concepts, must-know facts, YAML/JSON samples, traps. This 
 | [Amazon EventBridge](eventbridge.md) | 5 | [11](../labs/11-eventbridge-sqs-dlq/README.md), [14](../labs/14-guardduty-security-response/README.md) |
 | [AWS Health](health.md) | 5 | - |
 | [SQS, SNS, Kinesis, Firehose and Lambda event handling](sqs-sns-kinesis.md) | 3, 5 | [11](../labs/11-eventbridge-sqs-dlq/README.md) |
-| [Athena, Glue and QuickSight (log analytics)](analytics-athena-glue-quicksight.md) | 4 | - |
+| [Athena and QuickSight (log analytics)](analytics-athena-quicksight.md) | 4 | - |
 
 ## Security
 

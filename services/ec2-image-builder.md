@@ -1,4 +1,4 @@
-[← Amazon ECR](ecr.md) | [Services index](README.md) | [🏠 Home](../README.md) | [AWS Amplify (web and mobile app hosting) →](amplify.md)
+[← Amazon ECR](ecr.md) | [Services index](README.md) | [🏠 Home](../README.md) | [AWS Elastic Beanstalk →](elastic-beanstalk.md)
 
 # EC2 Image Builder
 
@@ -29,4 +29,4 @@ Older pattern (still valid): SSM Automation runbook `AWS-UpdateLinuxAmi` / `AWS-
 
 ---
 
-[← Amazon ECR](ecr.md) | [Services index](README.md) | [🏠 Home](../README.md) | [AWS Amplify (web and mobile app hosting) →](amplify.md)
+[← Amazon ECR](ecr.md) | [Services index](README.md) | [🏠 Home](../README.md) | [AWS Elastic Beanstalk →](elastic-beanstalk.md)

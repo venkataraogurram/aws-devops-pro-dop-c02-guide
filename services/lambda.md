@@ -41,7 +41,7 @@ Resources:
 - **Provisioned concurrency**: pre-initialised environments, no cold starts. Can be scheduled/scaled with Application Auto Scaling.
 - Throttled **synchronous** calls return **429** to the caller.
 - Throttled **asynchronous** calls (and 5xx system errors): Lambda keeps the event and retries for up to **6 hours**, with backoff from about 1 second up to 5 minutes. Then it goes to the on-failure destination/DLQ if configured.
-- **Cold start**: first request on a new environment loads code and runs init code outside the handler. Reduce with provisioned concurrency, SnapStart (Java, Python, .NET), smaller packages.
+- **Cold start**: first request on a new environment loads code and runs init code outside the handler. Reduce with **provisioned concurrency** (the exam answer) and smaller packages.
 
 ## Storage options
 | Option | Notes |
@@ -50,7 +50,6 @@ Resources:
 | Layers | Up to 5 layers, read-only, shared code/libraries |
 | S3 | Durable objects, accessed through the API |
 | **EFS** | Shared, persistent file system. Function must be **in a VPC**, uses an **EFS access point**. Watch EFS connection limits under high concurrency. **Cross-account EFS**: VPC peering/Transit Gateway between the VPCs, EFS file system policy allowing the other account, and Lambda role permissions to describe/mount |
-| S3 Files | S3 data exposed as a file system (newer, 2026). Also mountable from Lambda |
 
 ---
 

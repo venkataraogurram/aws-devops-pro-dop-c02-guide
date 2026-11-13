@@ -12,13 +12,12 @@
 - **Cross-Region copy** and **cross-account copy** (within org) in the plan's copy action.
 - **Vault Lock** (WORM: governance or compliance mode) - backups can't be deleted even by root -> ransomware protection. **Logically air-gapped vault**.
 - **Organization backup policies** to apply plans to all accounts.
-- **Backup Audit Manager** frameworks/controls for compliance reports.
 - **Restore testing** plans (automatic periodic restore validation).
 - EventBridge events for job state (failed backups -> SNS).
 
 **Service-native backups:** RDS automated backups (1-35 days, PITR to 5-min granularity) + manual snapshots (kept until deleted); DynamoDB PITR; EBS snapshots with DLM; S3 versioning + Object Lock + replication; Aurora **Backtrack** (MySQL, rewind in place without restore).
 
-**Recovery procedures (automate them):** SSM Automation runbooks to restore/promote, CFN templates for DR stack, Route 53 ARC / failover records, regular **DR drills** with FIS / Aurora switchover / DRS drills.
+**Recovery procedures (automate them):** SSM Automation runbooks to restore/promote, CFN templates for DR stack, Route 53 failover records, regular **DR drills** with FIS / Aurora switchover / DRS drills.
 
 ---
 

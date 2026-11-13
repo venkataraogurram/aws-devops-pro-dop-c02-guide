@@ -26,7 +26,6 @@
 ## ALB and NLB features
 - **ALB listener rules**: route by path, host header, HTTP header, method, query string, source IP. Actions: forward, redirect (e.g., HTTP -> HTTPS), fixed response, authenticate (Cognito/OIDC).
 - **Weighted target groups**: one rule forwards to two target groups with weights (e.g., 90/10) -> blue/green or canary at the load balancer, without DNS changes.
-- **Dual-stack**: ALB/NLB can accept IPv4 and IPv6 clients (`dualstack` IP address type). Targets can be IPv4 or IPv6.
 - **NLB + PrivateLink**: put an NLB in front of your service and create a **VPC endpoint service**; consumers in other VPCs/accounts connect through an interface endpoint. Works even when VPC CIDRs **overlap** (VPC peering doesn't).
 - ALB is in front of Lambda, ECS, EC2, IPs; NLB gives static IPs per AZ and TLS passthrough/termination.
 

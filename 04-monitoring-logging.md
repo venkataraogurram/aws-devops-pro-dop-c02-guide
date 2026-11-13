@@ -17,7 +17,7 @@ Read these service files first, then the sections below.
 - [Amazon CloudWatch (metrics, alarms, logs, agent, synthetics)](services/cloudwatch.md)
 - [AWS X-Ray](services/xray.md)
 - [AWS CloudTrail](services/cloudtrail.md)
-- [Athena, Glue and QuickSight (log analytics)](services/analytics-athena-glue-quicksight.md)
+- [Athena and QuickSight (log analytics)](services/analytics-athena-quicksight.md)
 
 ## 4.1 Other logs you must know
 

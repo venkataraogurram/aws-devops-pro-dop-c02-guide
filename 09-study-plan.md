@@ -17,7 +17,7 @@
 | Day | Date | Topics | Lab |
 |---|---|---|---|
 | 1 | Sat Nov 14 | [Ch 0](00-exam-strategy.md) strategy. Take the **free official practice question set** on Skill Builder as a baseline. [Ch 1](01-sdlc-automation.md) big picture, [CodeCommit](services/codecommit.md), [CodeBuild](services/codebuild.md) | [Lab 01](labs/01-codebuild-codepipeline/README.md) steps 1-4 |
-| 2 | Sun Nov 15 | [CodePipeline](services/codepipeline.md) (incl. cross-account), [CodeArtifact](services/codeartifact.md), [ECR](services/ecr.md), [Image Builder](services/ec2-image-builder.md), [Amplify](services/amplify.md) | [Lab 01](labs/01-codebuild-codepipeline/README.md) steps 5-7, [Lab 04](labs/04-ecs-circuit-breaker/README.md) step 3 |
+| 2 | Sun Nov 15 | [CodePipeline](services/codepipeline.md) (incl. cross-account), [CodeArtifact](services/codeartifact.md), [ECR](services/ecr.md), [Image Builder](services/ec2-image-builder.md) | [Lab 01](labs/01-codebuild-codepipeline/README.md) steps 5-7, [Lab 04](labs/04-ecs-circuit-breaker/README.md) step 3 |
 | 3 | Mon Nov 16 | [CodeDeploy](services/codedeploy.md): AppSpec, hook order, configs | [Lab 02](labs/02-codedeploy-ec2-rollback/README.md) |
 | 4 | Tue Nov 17 | [CodeDeploy](services/codedeploy.md) again: agent, rollbacks, troubleshooting. Memorise the hook order | - |
 | 5 | Wed Nov 18 | [Ch 1](01-sdlc-automation.md) deployment strategies, [Elastic Beanstalk](services/elastic-beanstalk.md), [ECS/EKS](services/ecs-eks.md), [Lambda](services/lambda.md), [API Gateway](services/api-gateway.md) | [Lab 03](labs/03-sam-lambda-canary/README.md), [Lab 04](labs/04-ecs-circuit-breaker/README.md) |
@@ -42,7 +42,7 @@
 | 16 | Sun Nov 29 | [Auto Scaling](services/ec2-auto-scaling.md), [ELB](services/elastic-load-balancing.md), [AWS Backup](services/aws-backup.md), [Resilience Hub/FIS/DRS](services/resilience-hub-fis-drs.md). Q25-Q35 | [Lab 12](labs/12-auto-scaling-lifecycle-hooks/README.md) |
 | 17 | Mon Nov 30 | Domain 3 practice set | - |
 | 18 | Tue Dec 1 | [CloudWatch](services/cloudwatch.md): metrics, alarms, Logs, filter syntax, Logs Insights, agent | [Lab 09](labs/09-cloudwatch-logs-alarms/README.md) |
-| 19 | Wed Dec 2 | [X-Ray](services/xray.md), CloudWatch Synthetics, [Athena/Glue/QuickSight](services/analytics-athena-glue-quicksight.md) | [Lab 10](labs/10-xray-api-gateway-lambda/README.md) |
+| 19 | Wed Dec 2 | [X-Ray](services/xray.md), CloudWatch Synthetics, [Athena/QuickSight](services/analytics-athena-quicksight.md) | [Lab 10](labs/10-xray-api-gateway-lambda/README.md) |
 | 20 | Thu Dec 3 | [CloudTrail](services/cloudtrail.md), [Ch 4](04-monitoring-logging.md) other logs, log security, quick-map. Q36-Q45 | - |
 | 21 | Fri Dec 4 | Domain 4 practice set | - |
 

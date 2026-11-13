@@ -63,7 +63,6 @@
 | **Live Tail** | Real-time view of incoming logs for troubleshooting |
 | **Export to S3** | `CreateExportTask` - **batch**, can take up to 12 h, not real time. For continuous delivery to S3 use subscription -> Firehose -> S3 |
 | **Data protection policies** | Detect and **mask sensitive data** (PII, credentials) in logs |
-| **Field indexes / transformers** | Parse/normalise logs at ingestion |
 | **Centralization rules** | Copy logs from org accounts/Regions into a central account |
 
 ### Filter pattern syntax (used by metric filters, subscription filters, `filter-log-events`)
@@ -99,7 +98,7 @@ parse @message "user=* action=*" as user, action
 
 ```mermaid
 flowchart LR
-  LG[CloudWatch Logs] -- subscription filter --> KDS[Kinesis Data Streams] --> L[Lambda / KCL app / Managed Flink]
+  LG[CloudWatch Logs] -- subscription filter --> KDS[Kinesis Data Streams] --> L[Lambda / KCL consumer app]
   LG -- subscription filter --> FH[Data Firehose] --> S3[(S3)] --> ATH[Athena]
   FH --> OS[OpenSearch]
   FH --> SPL[Splunk / HTTP endpoint]
@@ -115,7 +114,6 @@ flowchart LR
 | Ad-hoc SQL over logs in S3 | Athena (partition by date, use Parquet via Firehose conversion for cost) |
 | BI dashboards | QuickSight (over Athena) |
 | Big data processing | EMR |
-| Stream analytics SQL/Java | Managed Service for Apache Flink |
 | Logs from SaaS apps | AppFlow |
 
 ## CloudWatch agent (unified agent)
@@ -136,11 +134,8 @@ flowchart LR
 - **Amazon QuickSight** (Quick Sight): BI dashboards from Athena/S3/Redshift (e.g., Config/Inventory/CUR data).
 - **Managed Grafana**: Grafana dashboards over CloudWatch, Prometheus, X-Ray, OpenSearch, with IAM Identity Center auth.
 
-## CloudWatch Synthetics and RUM
+## CloudWatch Synthetics
 - **Synthetics canaries**: scripts (Node.js Puppeteer/Playwright, Python Selenium) run on a schedule to test endpoints/UI flows (heartbeat, API, broken link checker, visual monitoring, GUI workflow). Metrics + screenshots + HAR, alarm on `SuccessPercent`. Test **before users notice**; run after deploys in the pipeline.
-- **RUM**: real user monitoring from browsers (page load, JS errors).
-- **Internet Monitor**: internet-side availability/performance for your users.
-- **Evidently** (feature experiments) - deprecated; use AppConfig.
 
 ## EC2 status checks and recovery
 - **System status check** (`StatusCheckFailed_System`): problem with AWS hardware, network or power on the host. Fix: **stop and start** (moves to new hardware) or a CloudWatch alarm with the **recover** action (same instance ID, private IP, Elastic IP, metadata, placement group). Many instance types also have simplified automatic recovery by default.

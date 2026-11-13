@@ -31,7 +31,7 @@
 
 ## Load balancing, storage and scaling
 - **ALB** (most common, dynamic host port mapping on EC2 launch type, path/host routing), **NLB** (high throughput, TCP/UDP, PrivateLink). Classic LB is not recommended.
-- **EFS volumes** for persistent shared storage across tasks and AZs (Fargate + EC2). **S3 Files volumes** (2026): mount S3 data as a file system for tasks on **Fargate and ECS Managed Instances only (not the EC2 launch type)**; changes sync to the bucket.
+- **EFS volumes** for persistent shared storage across tasks and AZs (Fargate + EC2).
 - **Service auto scaling** (Application Auto Scaling): target tracking on CPU/memory/ALB `RequestCountPerTarget`, step, scheduled. For the EC2 launch type also scale the instances: **capacity provider with managed scaling** (recommended) or ASG scaling on cluster reservation.
 
 ## Event-driven ECS patterns

@@ -46,7 +46,7 @@
 - **Lifecycle hooks also fire** when instances enter the warm pool and when they move into service, so init scripts run once at warm-up time, not on every scale-out.
 
 ## AWS Application Auto Scaling
-One scaling API (target tracking, step, scheduled) for non-EC2 resources: **ECS services**, **DynamoDB tables and GSIs**, **Aurora replicas**, **Lambda provisioned concurrency**, **ElastiCache (Redis/Valkey) replication groups**, **EMR clusters**, Spot Fleet, SageMaker endpoints, MSK broker storage, Keyspaces, Neptune, AppStream fleets, Comprehend endpoints, and **custom resources** (your own API).
+One scaling API (target tracking, step, scheduled) for non-EC2 resources: **ECS services**, **DynamoDB tables and GSIs**, **Aurora replicas**, **Lambda provisioned concurrency**, **ElastiCache (Redis/Valkey) replication groups**, **EMR clusters**, Spot Fleet, and **custom resources** (your own API).
 
 ---
 

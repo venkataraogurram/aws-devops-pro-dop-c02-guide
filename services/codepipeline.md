@@ -88,7 +88,6 @@ CodePipeline stores artifacts in an S3 bucket per Region. Use **versioning**, **
 | Deploy CodeDeploy / Elastic Beanstalk / ECS / S3 / Service Catalog | 1 | 0 |
 | Invoke Lambda | 0-5 | 0-5 |
 
-Other action providers to recognise: **AWS Device Farm** (test on real mobile devices/browsers), **Jenkins** (custom build/test action through the Jenkins plugin), Step Functions invoke, Alexa Skills Kit.
 
 ## CloudFormation deploy action
 - Action modes: `CREATE_UPDATE`, `DELETE_ONLY`, `REPLACE_ON_FAILURE` (delete a failed stack and recreate, good for test stacks), `CHANGE_SET_REPLACE` (create or replace a change set), `CHANGE_SET_EXECUTE`.

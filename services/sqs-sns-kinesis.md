@@ -1,4 +1,4 @@
-[← AWS Health](health.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Athena, Glue and QuickSight (log analytics) →](analytics-athena-glue-quicksight.md)
+[← AWS Health](health.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Athena and QuickSight (log analytics) →](analytics-athena-quicksight.md)
 
 # SQS, SNS, Kinesis, Firehose and Lambda event handling
 
@@ -14,7 +14,7 @@
 | **EventBridge** | Event router with rules | Content-based routing to 20+ target types, SaaS, cross-account; lower throughput than SNS but richer filtering |
 | **Kinesis Data Streams** | Ordered stream (shards), replay, multiple consumers | Retention 24 h default up to 365 days; per shard 1 MB/s or 1,000 records/s in, 2 MB/s out; **enhanced fan-out** (dedicated 2 MB/s per consumer); partition key -> shard ordering; on-demand mode |
 | **Data Firehose** | Managed delivery (no consumers to write) | Buffer by size/time, transform with Lambda, convert to Parquet/ORC, destinations S3/Redshift/OpenSearch/Splunk/HTTP. Near real-time (not real-time) |
-| **Lambda** | Compute triggered by events | Sync (API GW), async (S3, SNS, EventBridge - 2 retries, **on-failure destination** or DLQ), poll-based **event source mapping** (SQS, Kinesis, DynamoDB Streams, MSK: batch size, batching window, **bisect batch on error**, **maximum retry attempts**, **maximum record age**, on-failure destination, **partial batch response** `ReportBatchItemFailures`) |
+| **Lambda** | Compute triggered by events | Sync (API GW), async (S3, SNS, EventBridge - 2 retries, **on-failure destination** or DLQ), poll-based **event source mapping** (SQS, Kinesis, DynamoDB Streams: batch size, batching window, **bisect batch on error**, **maximum retry attempts**, **maximum record age**, on-failure destination, **partial batch response** `ReportBatchItemFailures`) |
 | **Step Functions** | Orchestration | Retries/Catch, parallel, human approval, long-running |
 
 **Patterns (exam names them):**
@@ -41,16 +41,15 @@
 | | Data Streams | Data Firehose |
 |---|---|---|
 | Purpose | Stream storage for custom consumers | Load streaming data into destinations |
-| Consumers | You write them (Lambda, KCL, Flink) | Fully managed delivery to S3, Redshift, OpenSearch, Splunk, HTTP endpoints, Snowflake... |
+| Consumers | You write them (Lambda, KCL apps) | Fully managed delivery to S3, Redshift, OpenSearch, Splunk, HTTP endpoints |
 | Latency | Real time (~70-200 ms) | Near real time (buffer 0-900 s) |
 | Retention / replay | 24 h-365 days, replay | No storage, no replay |
 | Scaling | Provisioned or on-demand | Automatic |
 
-**Managed Service for Apache Flink**: run Flink apps (Java, Python, SQL via Studio) to analyse streams from Kinesis Data Streams or MSK in real time.
 
 ## SNS dead-letter queues
 Each **subscription** can have its own SQS DLQ (redrive policy). Messages that SNS can't deliver after its retry policy (e.g., endpoint down, Lambda deleted) go there. FIFO topics need FIFO DLQs.
 
 ---
 
-[← AWS Health](health.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Athena, Glue and QuickSight (log analytics) →](analytics-athena-glue-quicksight.md)
+[← AWS Health](health.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Athena and QuickSight (log analytics) →](analytics-athena-quicksight.md)

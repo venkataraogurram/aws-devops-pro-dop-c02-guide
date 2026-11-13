@@ -37,15 +37,12 @@
 |---|---|---|
 | Replication / Multi-AZ failover | Yes | No |
 | Persistence / backups | Yes (snapshots, AOF) | No |
-| Data types | Rich (sets, sorted sets, streams...) | Simple key-value |
 | Scaling | Replicas + shards | Add nodes (sharding), multi-threaded |
 
 - **Cluster mode disabled**: one shard, one primary + **up to 5 replicas**, scale reads by adding replicas, scale writes only vertically.
 - **Cluster mode enabled**: data partitioned across multiple shards (up to 500 nodes per cluster in total), each shard with a primary + up to 5 replicas; scale writes horizontally; online resharding.
-- Endpoints: **primary endpoint** (writes), **reader endpoint** (reads, cluster mode disabled), **configuration endpoint** (cluster mode enabled), node endpoints.
 
 ## DynamoDB details
-- Items up to 400 KB; primary key = partition key (+ optional sort key).
 - **Capacity**: provisioned (RCU/WCU, optional auto scaling) or **on-demand** (pay per request).
 - **DAX**: in-memory cache in front of DynamoDB, microsecond reads, no app changes beyond the DAX client. **DAX vs ElastiCache**: DAX for caching individual items/queries of DynamoDB; ElastiCache for caching computed/aggregated results or data from other sources.
 - **DynamoDB Streams**: ordered item changes, 24 h retention, consumed by Lambda / KCL (or use **Kinesis Data Streams for DynamoDB** for longer retention and more consumers). Used for global tables, triggers, analytics.
@@ -64,7 +61,7 @@
 - Homogeneous (Oracle -> Oracle) or heterogeneous (Oracle -> Aurora PostgreSQL). For heterogeneous, convert the schema first with **AWS SCT (Schema Conversion Tool)** or DMS Schema Conversion.
 - **Full load + CDC (change data capture)** = continuous replication, minimal-downtime cutover.
 - **Multi-AZ** replication instance = synchronous standby in another AZ for HA of the migration itself.
-- **Monitoring**: task status and table state in the console; CloudWatch metrics for the host (CPU, memory, storage), replication task (throughput, `CDCLatencySource`, `CDCLatencyTarget`) and tables; CloudWatch Logs for task logs.
+- **Monitoring**: CloudWatch metrics for the replication instance and task (e.g., CDC latency), and task logs in CloudWatch Logs.
 
 ## AWS Storage Gateway (hybrid storage)
 - Gives on-premises apps access to AWS storage: **S3 File Gateway** (NFS/SMB -> S3), **FSx File Gateway** (SMB -> FSx for Windows), **Volume Gateway** (iSCSI block volumes backed by S3 + EBS snapshots), **Tape Gateway** (virtual tape library -> S3/Glacier).

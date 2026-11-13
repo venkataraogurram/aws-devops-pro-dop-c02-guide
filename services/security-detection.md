@@ -18,8 +18,6 @@
 | **IAM Access Analyzer** | **External access** findings (resources shared outside zone of trust: S3, KMS, IAM roles, Lambda, SQS, Secrets Manager...), **unused access** findings, **policy validation** (lint + custom policy checks in CI: `check-no-new-access`, `check-access-not-granted`), **policy generation** from CloudTrail | Account or organization zone of trust | "Find resources shared with external accounts", "validate IAM policies in pipeline", "generate least-privilege policy from activity" |
 | **AWS Config** | Configuration compliance ([AWS Config](config.md)) | All supported resources | "Detect non-compliant configuration" |
 | **AWS Trusted Advisor** | Best-practice checks: cost, performance, **security** (open SGs, MFA on root, exposed keys, S3 permissions), fault tolerance, service limits | Full checks with Business+ support; org view | "Check service quotas / basic security checks"; events in EventBridge (us-east-1) |
-| **AWS Audit Manager** | Collect evidence continuously for audits (frameworks: SOC 2, PCI, HIPAA, GDPR) | | "Prepare audit-ready evidence reports" |
-| **AWS Artifact** | Download AWS compliance reports (SOC, ISO) and agreements (BAA) | | "Auditor needs AWS's SOC report" |
 | **CloudTrail / VPC Flow Logs / drift detection** | Auditing ([CloudTrail](cloudtrail.md), [CloudWatch](cloudwatch.md)) | | |
 
 **Detect vs investigate vs aggregate vs remediate (don't mix them up):**
