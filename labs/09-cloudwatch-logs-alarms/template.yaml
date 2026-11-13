@@ -1,0 +1,104 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 09 - CloudWatch Logs metric filter + alarm + subscription filter to Lambda
+
+Parameters:
+  NotificationEmail:
+    Type: String
+
+Resources:
+  AppLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: /dop-lab09/app
+      RetentionInDays: 1
+
+  Http500Filter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref AppLogGroup
+      FilterPattern: "{ $.statusCode = 500 }"
+      MetricTransformations:
+        - MetricNamespace: DOP-Lab09
+          MetricName: Http500Count
+          MetricValue: "1"
+          DefaultValue: 0
+
+  LatencyFilter:
+    Type: AWS::Logs::MetricFilter
+    Properties:
+      LogGroupName: !Ref AppLogGroup
+      FilterPattern: "{ $.latencyMs = * }"
+      MetricTransformations:
+        - MetricNamespace: DOP-Lab09
+          MetricName: LatencyMs
+          MetricValue: $.latencyMs          # extract the number from the log event
+
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref NotificationEmail
+
+  Http500Alarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: dop-lab09-too-many-500s
+      Namespace: DOP-Lab09
+      MetricName: Http500Count
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 5
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions: [!Ref Topic]
+      OKActions: [!Ref Topic]
+
+  SubscriberRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  Subscriber:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: dop-lab09-error-subscriber
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt SubscriberRole.Arn
+      Timeout: 10
+      Code:
+        ZipFile: |
+          import base64, gzip, json
+          def handler(event, context):
+              # Subscription data arrives base64-encoded and gzip-compressed
+              payload = json.loads(gzip.decompress(base64.b64decode(event["awslogs"]["data"])))
+              print(f"log group={payload['logGroup']} stream={payload['logStream']} filters={payload['subscriptionFilters']}")
+              for e in payload["logEvents"]:
+                  print("ERROR EVENT:", e["message"])
+              return len(payload["logEvents"])
+
+  SubscriberPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref Subscriber
+      Action: lambda:InvokeFunction
+      Principal: logs.amazonaws.com
+      SourceArn: !GetAtt AppLogGroup.Arn
+      SourceAccount: !Ref AWS::AccountId
+
+  ErrorSubscription:
+    Type: AWS::Logs::SubscriptionFilter
+    DependsOn: SubscriberPermission
+    Properties:
+      LogGroupName: !Ref AppLogGroup
+      FilterPattern: '{ $.level = "ERROR" }'
+      DestinationArn: !GetAtt Subscriber.Arn

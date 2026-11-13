@@ -1,4 +1,4 @@
-[🏠 Home](README.md) | [1. Domain 1: SDLC Automation (22%) →](01-sdlc-automation.md)
+[🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [1. Domain 1: SDLC Automation (22%) →](01-sdlc-automation.md)
 
 # Chapter 0 - Exam Facts and Strategy
 
@@ -101,4 +101,4 @@ If a question offers a discontinued service and a current managed service that d
 
 ---
 
-[🏠 Home](README.md) | [1. Domain 1: SDLC Automation (22%) →](01-sdlc-automation.md)
+[🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [1. Domain 1: SDLC Automation (22%) →](01-sdlc-automation.md)

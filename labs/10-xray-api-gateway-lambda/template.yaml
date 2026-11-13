@@ -1,0 +1,53 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: DOP-C02 Lab 10 - X-Ray tracing across API Gateway (REST) -> Lambda -> DynamoDB, IAM-authenticated API
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    MemorySize: 256
+    Tracing: Active                    # Lambda active tracing (SAM adds the X-Ray write permissions)
+
+Resources:
+  OrdersApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: dop-lab10-api
+      StageName: prod
+      TracingEnabled: true             # X-Ray tracing on the API Gateway stage
+      Auth:
+        DefaultAuthorizer: AWS_IAM     # callers must SigV4-sign requests; no anonymous access
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          MetricsEnabled: true
+
+  OrdersTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: dop-lab10-orders
+
+  OrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: dop-lab10-order
+      Handler: app.handler
+      CodeUri: src/
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref OrdersTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref OrdersTable
+      Events:
+        Order:
+          Type: Api
+          Properties:
+            RestApiId: !Ref OrdersApi
+            Path: /order
+            Method: get
+
+Outputs:
+  ApiUrl:
+    Value: !Sub https://${OrdersApi}.execute-api.${AWS::Region}.amazonaws.com/prod/order

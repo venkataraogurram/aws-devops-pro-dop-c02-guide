@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 16 - DR Region (us-west-2) replica bucket. Deploy this first.
+
+Resources:
+  ReplicaBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration: { Status: Enabled }     # required on the destination too
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+Outputs:
+  ReplicaBucketArn:
+    Value: !GetAtt ReplicaBucket.Arn
+  ReplicaBucketName:
+    Value: !Ref ReplicaBucket

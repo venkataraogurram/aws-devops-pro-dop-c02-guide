@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 16 - primary Region (us-east-1) S3 CRR source, DynamoDB global table, Route 53 failover on an alarm-based health check
+
+Parameters:
+  ReplicaBucketArn:
+    Type: String
+  PrimaryIp:
+    Type: String
+    Default: 192.0.2.10          # documentation-only address (RFC 5737), nothing real behind it
+  SecondaryIp:
+    Type: String
+    Default: 198.51.100.10
+
+Resources:
+  SourceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub dop-lab16-src-${AWS::AccountId}
+      VersioningConfiguration: { Status: Enabled }
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      ReplicationConfiguration:
+        Role: !GetAtt ReplicationRole.Arn
+        Rules:
+          - Id: everything-to-dr
+            Status: Enabled
+            Priority: 1
+            Filter: { Prefix: "" }
+            DeleteMarkerReplication: { Status: Disabled }   # deletes in the source are not replicated
+            Destination:
+              Bucket: !Ref ReplicaBucketArn
+
+  ReplicationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: s3.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: replicate
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [s3:GetReplicationConfiguration, s3:ListBucket]
+                Resource: !Sub arn:${AWS::Partition}:s3:::dop-lab16-src-${AWS::AccountId}
+              - Effect: Allow
+                Action: [s3:GetObjectVersionForReplication, s3:GetObjectVersionAcl, s3:GetObjectVersionTagging]
+                Resource: !Sub arn:${AWS::Partition}:s3:::dop-lab16-src-${AWS::AccountId}/*
+              - Effect: Allow
+                Action: [s3:ReplicateObject, s3:ReplicateDelete, s3:ReplicateTags]
+                Resource: !Sub ${ReplicaBucketArn}/*
+
+  OrdersTable:
+    Type: AWS::DynamoDB::GlobalTable
+    Properties:
+      TableName: dop-lab16-orders
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: id, AttributeType: S }
+      KeySchema:
+        - { AttributeName: id, KeyType: HASH }
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+      Replicas:
+        - Region: us-east-1
+        - Region: us-west-2
+
+  PrimaryHealthAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: dop-lab16-primary-unhealthy
+      Namespace: DOP-Lab16
+      MetricName: PrimaryHealthy
+      Statistic: Minimum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: breaching       # no heartbeat = unhealthy
+
+  PrimaryHealthCheck:
+    Type: AWS::Route53::HealthCheck
+    Properties:
+      HealthCheckConfig:
+        Type: CLOUDWATCH_METRIC
+        AlarmIdentifier:
+          Name: !Ref PrimaryHealthAlarm
+          Region: !Ref AWS::Region
+        InsufficientDataHealthStatus: Unhealthy
+      HealthCheckTags:
+        - { Key: Name, Value: dop-lab16-primary }
+
+  Zone:
+    Type: AWS::Route53::HostedZone
+    Properties:
+      Name: dop-lab16.example.com       # not delegated anywhere; we query Route 53 directly with test-dns-answer
+
+  PrimaryRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref Zone
+      Name: app.dop-lab16.example.com
+      Type: A
+      TTL: "60"
+      SetIdentifier: primary
+      Failover: PRIMARY
+      HealthCheckId: !Ref PrimaryHealthCheck
+      ResourceRecords: [!Ref PrimaryIp]
+
+  SecondaryRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      HostedZoneId: !Ref Zone
+      Name: app.dop-lab16.example.com
+      Type: A
+      TTL: "60"
+      SetIdentifier: secondary
+      Failover: SECONDARY
+      ResourceRecords: [!Ref SecondaryIp]
+
+Outputs:
+  SourceBucketName:
+    Value: !Ref SourceBucket
+  HostedZoneId:
+    Value: !Ref Zone
+  HealthCheckId:
+    Value: !Ref PrimaryHealthCheck

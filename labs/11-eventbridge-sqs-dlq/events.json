@@ -1,0 +1,7 @@
+[
+  { "EventBusName": "dop-lab11-bus", "Source": "com.dop.orders", "DetailType": "OrderPlaced", "Detail": "{\"orderId\":\"o-1\",\"amount\":250}" },
+  { "EventBusName": "dop-lab11-bus", "Source": "com.dop.orders", "DetailType": "OrderPlaced", "Detail": "{\"orderId\":\"o-2\",\"amount\":40}" },
+  { "EventBusName": "dop-lab11-bus", "Source": "com.dop.orders", "DetailType": "OrderPlaced", "Detail": "{\"orderId\":\"o-3\",\"amount\":100}" },
+  { "EventBusName": "dop-lab11-bus", "Source": "com.dop.orders", "DetailType": "OrderPlaced", "Detail": "{\"orderId\":\"poison\",\"amount\":999}" },
+  { "EventBusName": "dop-lab11-bus", "Source": "com.dop.orders", "DetailType": "OrderCancelled", "Detail": "{\"orderId\":\"o-1\",\"amount\":250}" }
+]

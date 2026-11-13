@@ -1,4 +1,4 @@
-[← 7. "Which one?" comparisons + numbers](07-service-comparisons-numbers.md) | [🏠 Home](README.md) | [9. 46-day study plan + exam-day checklist →](09-study-plan.md)
+[← 7. "Which one?" comparisons + numbers](07-service-comparisons-numbers.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [9. 46-day study plan + exam-day checklist →](09-study-plan.md)
 
 # Chapter 8 - Practice Questions (exam style, with explanations)
 
@@ -882,4 +882,4 @@ Track it like this:
 
 ---
 
-[← 7. "Which one?" comparisons + numbers](07-service-comparisons-numbers.md) | [🏠 Home](README.md) | [9. 46-day study plan + exam-day checklist →](09-study-plan.md)
+[← 7. "Which one?" comparisons + numbers](07-service-comparisons-numbers.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [9. 46-day study plan + exam-day checklist →](09-study-plan.md)

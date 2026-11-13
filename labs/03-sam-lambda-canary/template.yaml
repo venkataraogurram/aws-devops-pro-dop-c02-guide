@@ -1,0 +1,82 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: DOP-C02 Lab 03 - SAM gradual Lambda deployment (canary) with pre-traffic hook and alarm rollback
+
+Parameters:
+  AppVersion:
+    Type: String
+    Default: "1"
+  Mode:
+    Type: String
+    Default: ok
+    AllowedValues: [ok, break-real, break-all]
+    Description: ok = healthy; break-real = fails only for real traffic (hook passes); break-all = fails always (hook fails)
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 10
+    MemorySize: 128
+
+Resources:
+  HelloFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: dop-lab03-hello
+      Handler: app.handler
+      CodeUri: src/
+      AutoPublishAlias: live            # publish a new version on each change and move alias "live"
+      Environment:
+        Variables:
+          APP_VERSION: !Ref AppVersion
+          MODE: !Ref Mode
+      DeploymentPreference:
+        Type: Canary10Percent5Minutes     # 10% for 5 minutes, then 100%
+        Alarms:
+          - !Ref AliasErrorsAlarm          # ALARM during the deployment = automatic rollback
+        Hooks:
+          PreTraffic: !Ref PreTrafficHook
+
+  AliasErrorsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: dop-lab03-live-errors
+      AlarmDescription: Errors on the live alias
+      Namespace: AWS/Lambda
+      MetricName: Errors
+      Dimensions:
+        - Name: FunctionName
+          Value: !Ref HelloFunction
+        - Name: Resource
+          Value: !Sub "${HelloFunction}:live"
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+  PreTrafficHook:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: CodeDeployHook_dop-lab03-preTraffic   # SAM's CodeDeploy role may invoke only CodeDeployHook_* functions
+      Handler: hook.handler
+      CodeUri: hook/
+      DeploymentPreference:
+        Enabled: false
+      Environment:
+        Variables:
+          TARGET_VERSION_ARN: !Ref HelloFunction.Version
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: codedeploy:PutLifecycleEventHookExecutionStatus
+              Resource: !Sub arn:${AWS::Partition}:codedeploy:${AWS::Region}:${AWS::AccountId}:deploymentgroup:${ServerlessDeploymentApplication}/*
+            - Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: !Ref HelloFunction.Version
+
+Outputs:
+  FunctionName:
+    Value: !Ref HelloFunction

@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ReadParametersOfMyProjectOnly",
+      "Effect": "Allow",
+      "Action": "ssm:GetParameter",
+      "Resource": "arn:aws:ssm:*:ACCOUNT_ID:parameter/dop-lab13/*",
+      "Condition": {
+        "StringEquals": { "aws:ResourceTag/Project": "${aws:PrincipalTag/Project}" }
+      }
+    }
+  ]
+}

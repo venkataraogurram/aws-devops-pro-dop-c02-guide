@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 06 - roles for SELF_MANAGED StackSets where the administrator and target are the same account
+
+Resources:
+  AdministrationRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSCloudFormationStackSetAdministrationRole   # default name StackSets looks for
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: cloudformation.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: assume-execution-role
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: sts:AssumeRole
+                Resource: !Sub arn:${AWS::Partition}:iam::*:role/AWSCloudFormationStackSetExecutionRole
+
+  ExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: AWSCloudFormationStackSetExecutionRole        # default name in each target account
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { AWS: !GetAtt AdministrationRole.Arn }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        # Sandbox shortcut used by the AWS sample templates. In real accounts, scope this to what your StackSets deploy.
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess

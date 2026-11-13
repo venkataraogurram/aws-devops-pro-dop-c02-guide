@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 11 - EventBridge custom bus, content filtering, archive/replay, SQS + DLQ, Lambda partial batch failures
+
+Resources:
+  Bus:
+    Type: AWS::Events::EventBus
+    Properties:
+      Name: dop-lab11-bus
+
+  BusArchive:
+    Type: AWS::Events::Archive
+    Properties:
+      ArchiveName: dop-lab11-archive
+      SourceArn: !GetAtt Bus.Arn
+      RetentionDays: 1
+
+  OrdersDLQ:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: dop-lab11-orders-dlq
+      MessageRetentionPeriod: 345600            # 4 days
+
+  OrdersQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: dop-lab11-orders
+      VisibilityTimeout: 60                      # >= 6x the Lambda timeout (10 s)
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt OrdersDLQ.Arn
+        maxReceiveCount: 3                       # after 3 failed receives -> DLQ
+
+  BigOrdersRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: dop-lab11-big-orders
+      EventBusName: !Ref Bus
+      EventPattern:
+        source: [com.dop.orders]
+        detail-type: [OrderPlaced]
+        detail:
+          amount: [{ numeric: [">=", 100] }]    # content filtering: only orders of 100 or more
+      Targets:
+        - Id: orders-queue
+          Arn: !GetAtt OrdersQueue.Arn
+
+  QueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues: [!Ref OrdersQueue]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: events.amazonaws.com }
+            Action: sqs:SendMessage
+            Resource: !GetAtt OrdersQueue.Arn
+            Condition:
+              ArnEquals: { aws:SourceArn: !GetAtt BigOrdersRule.Arn }
+
+  ConsumerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: read-queue
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: [sqs:ReceiveMessage, sqs:DeleteMessage, sqs:GetQueueAttributes, sqs:ChangeMessageVisibility]
+                Resource: !GetAtt OrdersQueue.Arn
+
+  Consumer:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: dop-lab11-consumer
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt ConsumerRole.Arn
+      Timeout: 10
+      Environment:
+        Variables:
+          ACCEPT_POISON: "false"
+      Code:
+        ZipFile: |
+          import json, os
+          def handler(event, context):
+              failures = []
+              for record in event["Records"]:
+                  order = json.loads(record["body"])["detail"]
+                  if order.get("orderId") == "poison" and os.environ["ACCEPT_POISON"] != "true":
+                      print("FAILED:", order)
+                      failures.append({"itemIdentifier": record["messageId"]})   # only this message is retried
+                  else:
+                      print("PROCESSED:", order)
+              return {"batchItemFailures": failures}
+
+  EventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      FunctionName: !Ref Consumer
+      EventSourceArn: !GetAtt OrdersQueue.Arn
+      BatchSize: 5
+      FunctionResponseTypes: [ReportBatchItemFailures]
+
+  DLQAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: dop-lab11-dlq-not-empty
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions: [{ Name: QueueName, Value: !GetAtt OrdersDLQ.QueueName }]
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+
+Outputs:
+  QueueUrl:
+    Value: !Ref OrdersQueue
+  DLQUrl:
+    Value: !Ref OrdersDLQ
+  DLQArn:
+    Value: !GetAtt OrdersDLQ.Arn
+  ArchiveArn:
+    Value: !GetAtt BusArchive.Arn
+  BusArn:
+    Value: !GetAtt Bus.Arn

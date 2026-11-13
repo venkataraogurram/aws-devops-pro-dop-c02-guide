@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 14 - GuardDuty findings -> EventBridge -> SNS + responder Lambda; CloudTrail API-call rule (deploy in us-east-1)
+
+Parameters:
+  NotificationEmail:
+    Type: String
+  CreateTrail:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: Set "true" only if the account has no CloudTrail trail with logging on (EventBridge needs one for "AWS API Call via CloudTrail").
+
+Conditions:
+  MakeTrail: !Equals [!Ref CreateTrail, "true"]
+
+Resources:
+  Topic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Protocol: email
+          Endpoint: !Ref NotificationEmail
+
+  TopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics: [!Ref Topic]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: events.amazonaws.com }
+            Action: sns:Publish
+            Resource: !Ref Topic
+            Condition:
+              StringEquals: { aws:SourceAccount: !Ref AWS::AccountId }
+
+  ResponderRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+
+  Responder:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: dop-lab14-responder
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt ResponderRole.Arn
+      Timeout: 10
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              f = event["detail"]
+              sample = f.get("service", {}).get("additionalInfo", {}).get("sample", False)
+              rtype = f.get("resource", {}).get("resourceType")
+              print(json.dumps({"type": f["type"], "severity": f["severity"], "resourceType": rtype, "sample": sample}))
+              # DRY RUN: this lab never changes resources. A real responder would, for example:
+              if rtype == "Instance":
+                  iid = f["resource"]["instanceDetails"].get("instanceId")
+                  print(f"WOULD isolate {iid}: replace its security groups with an isolation SG, snapshot EBS, tag it, notify")
+              elif rtype == "AccessKey":
+                  key = f["resource"]["accessKeyDetails"].get("accessKeyId")
+                  print(f"WOULD deactivate access key {key} / revoke role sessions, then notify")
+
+  HighSeverityRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: High-severity GuardDuty findings (7.0+)
+      EventPattern:
+        source: [aws.guardduty]
+        detail-type: [GuardDuty Finding]
+        detail:
+          severity: [{ numeric: [">=", 7] }]
+      Targets:
+        - Id: sns
+          Arn: !Ref Topic
+          InputTransformer:
+            InputPathsMap:
+              type: $.detail.type
+              sev: $.detail.severity
+              region: $.region
+            InputTemplate: '"GuardDuty HIGH finding <type> (severity <sev>) in <region>"'
+        - Id: responder
+          Arn: !GetAtt Responder.Arn
+
+  ResponderPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref Responder
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt HighSeverityRule.Arn
+
+  NewAccessKeyRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: Someone created an IAM access key (IAM is global, so its events arrive in us-east-1)
+      EventPattern:
+        source: [aws.iam]
+        detail-type: [AWS API Call via CloudTrail]
+        detail:
+          eventSource: [iam.amazonaws.com]
+          eventName: [CreateAccessKey]
+      Targets:
+        - Id: sns
+          Arn: !Ref Topic
+          InputTransformer:
+            InputPathsMap:
+              who: $.detail.userIdentity.arn
+              user: $.detail.requestParameters.userName
+            InputTemplate: '"CreateAccessKey called by <who> for user <user>"'
+
+  TrailBucket:
+    Type: AWS::S3::Bucket
+    Condition: MakeTrail
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  TrailBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: MakeTrail
+    Properties:
+      Bucket: !Ref TrailBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: cloudtrail.amazonaws.com }
+            Action: s3:GetBucketAcl
+            Resource: !GetAtt TrailBucket.Arn
+            Condition:
+              StringEquals: { aws:SourceArn: !Sub "arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/dop-lab14-trail" }
+          - Effect: Allow
+            Principal: { Service: cloudtrail.amazonaws.com }
+            Action: s3:PutObject
+            Resource: !Sub ${TrailBucket.Arn}/AWSLogs/${AWS::AccountId}/*
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+                aws:SourceArn: !Sub "arn:${AWS::Partition}:cloudtrail:${AWS::Region}:${AWS::AccountId}:trail/dop-lab14-trail"
+
+  Trail:
+    Type: AWS::CloudTrail::Trail
+    Condition: MakeTrail
+    DependsOn: TrailBucketPolicy
+    Properties:
+      TrailName: dop-lab14-trail
+      S3BucketName: !Ref TrailBucket
+      IsLogging: true
+      IsMultiRegionTrail: true
+      IncludeGlobalServiceEvents: true
+      EnableLogFileValidation: true
+
+Outputs:
+  TrailBucketName:
+    Condition: MakeTrail
+    Value: !Ref TrailBucket

@@ -1,0 +1,150 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 07 - Systems Manager fleet (Run Command, State Manager, CloudWatch agent, Inventory, Patch scan)
+
+Parameters:
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+  Subnets:
+    Type: List<AWS::EC2::Subnet::Id>
+  LatestAmi:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+  CreateInventoryAssociation:
+    Type: String
+    Default: "true"
+    AllowedValues: ["true", "false"]
+    Description: Set "false" if your account already collects inventory for all instances (e.g., Quick Setup); an instance can have only one inventory association.
+
+Conditions:
+  MakeInventory: !Equals [!Ref CreateInventoryAssociation, "true"]
+
+Resources:
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/AmazonSSMManagedInstanceCore      # SSM managed node
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/CloudWatchAgentServerPolicy       # agent: put metrics/logs, read its config
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref InstanceRole]
+
+  NoInboundSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Lab 07 - no inbound rules, no SSH. Everything goes through Systems Manager.
+      VpcId: !Ref VpcId
+
+  Node1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmi
+      InstanceType: t3.micro
+      SubnetId: !Select [0, !Ref Subnets]
+      SecurityGroupIds: [!Ref NoInboundSG]
+      IamInstanceProfile: !Ref InstanceProfile
+      MetadataOptions: { HttpTokens: required }
+      Tags:
+        - { Key: Name, Value: dop-lab07-node1 }
+        - { Key: Lab, Value: dop-lab07 }
+        - { Key: Patch Group, Value: dop-lab07 }
+
+  Node2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref LatestAmi
+      InstanceType: t3.micro
+      SubnetId: !Select [1, !Ref Subnets]
+      SecurityGroupIds: [!Ref NoInboundSG]
+      IamInstanceProfile: !Ref InstanceProfile
+      MetadataOptions: { HttpTokens: required }
+      Tags:
+        - { Key: Name, Value: dop-lab07-node2 }
+        - { Key: Lab, Value: dop-lab07 }
+        - { Key: Patch Group, Value: dop-lab07 }
+
+  CloudWatchAgentConfig:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: AmazonCloudWatch-dop-lab07          # CloudWatchAgentServerPolicy allows reading AmazonCloudWatch-* parameters
+      Type: String
+      Value: |
+        {
+          "agent": { "metrics_collection_interval": 60 },
+          "metrics": {
+            "namespace": "DOP-Lab07",
+            "append_dimensions": { "InstanceId": "${aws:InstanceId}" },
+            "metrics_collected": {
+              "mem":  { "measurement": ["mem_used_percent"] },
+              "disk": { "measurement": ["used_percent"], "resources": ["/"] }
+            }
+          },
+          "logs": {
+            "logs_collected": {
+              "files": {
+                "collect_list": [
+                  { "file_path": "/var/log/dnf.log", "log_group_name": "/dop-lab07/dnf", "log_stream_name": "{instance_id}" }
+                ]
+              }
+            }
+          }
+        }
+
+  InstallAgentAssociation:
+    Type: AWS::SSM::Association
+    Properties:
+      AssociationName: dop-lab07-install-cw-agent
+      Name: AWS-ConfigureAWSPackage
+      Parameters:
+        action: [Install]
+        name: [AmazonCloudWatchAgent]
+      Targets:
+        - Key: tag:Lab
+          Values: [dop-lab07]
+      ScheduleExpression: rate(1 day)
+
+  ConfigureAgentAssociation:
+    Type: AWS::SSM::Association
+    DependsOn: [InstallAgentAssociation, CloudWatchAgentConfig]
+    Properties:
+      AssociationName: dop-lab07-configure-cw-agent
+      Name: AmazonCloudWatch-ManageAgent
+      Parameters:
+        action: [configure]
+        mode: [ec2]
+        optionalConfigurationSource: [ssm]
+        optionalConfigurationLocation: [AmazonCloudWatch-dop-lab07]
+        optionalRestart: ["yes"]
+      Targets:
+        - Key: tag:Lab
+          Values: [dop-lab07]
+      ScheduleExpression: rate(1 day)
+
+  InventoryAssociation:
+    Type: AWS::SSM::Association
+    Condition: MakeInventory
+    Properties:
+      AssociationName: dop-lab07-inventory
+      Name: AWS-GatherSoftwareInventory
+      Parameters:
+        applications: [Enabled]
+        networkConfig: [Enabled]
+        services: [Enabled]
+      Targets:
+        - Key: tag:Lab
+          Values: [dop-lab07]
+      ScheduleExpression: rate(30 minutes)
+
+Outputs:
+  Node1Id:
+    Value: !Ref Node1
+  Node2Id:
+    Value: !Ref Node2

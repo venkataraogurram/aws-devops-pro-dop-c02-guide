@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: DOP-C02 Lab 08 (optional) - AWS Config recorder for security groups only. Skip if your Region already has a recorder.
+
+Resources:
+  ConfigBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  ConfigBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref ConfigBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ConfigAclCheck
+            Effect: Allow
+            Principal: { Service: config.amazonaws.com }
+            Action: [s3:GetBucketAcl, s3:ListBucket]
+            Resource: !GetAtt ConfigBucket.Arn
+            Condition:
+              StringEquals: { AWS:SourceAccount: !Ref AWS::AccountId }
+          - Sid: ConfigWrite
+            Effect: Allow
+            Principal: { Service: config.amazonaws.com }
+            Action: s3:PutObject
+            Resource: !Sub ${ConfigBucket.Arn}/AWSLogs/${AWS::AccountId}/Config/*
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+                AWS:SourceAccount: !Ref AWS::AccountId
+
+  ConfigRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: config.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - !Sub arn:${AWS::Partition}:iam::aws:policy/service-role/AWS_ConfigRole
+
+  Recorder:
+    Type: AWS::Config::ConfigurationRecorder
+    Properties:
+      RoleARN: !GetAtt ConfigRole.Arn
+      RecordingGroup:
+        AllSupported: false
+        IncludeGlobalResourceTypes: false
+        ResourceTypes: [AWS::EC2::SecurityGroup]   # keep the lab cheap: record only security groups
+
+  DeliveryChannel:
+    Type: AWS::Config::DeliveryChannel
+    DependsOn: ConfigBucketPolicy
+    Properties:
+      S3BucketName: !Ref ConfigBucket
+
+Outputs:
+  ConfigBucketName:
+    Value: !Ref ConfigBucket
