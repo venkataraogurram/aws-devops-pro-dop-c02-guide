@@ -30,6 +30,11 @@ With **GitHub/Bitbucket/GitLab** as source, CodeBuild **webhooks** with filter g
 - **Cross-Region replication** is not a built-in feature. Pattern: EventBridge rule on `referenceCreated` / `referenceUpdated` in the source Region -> CodeBuild project or ECS task that clones the repo and pushes it to a repo in the second Region. Use case: lower-latency pulls for distant teams, or a backup copy.
 - **Branch protection** = IAM deny on `GitPush` / `PutFile` / `MergeBranchesBy*` for `refs/heads/main` (condition key `codecommit:References`), plus approval rule templates on pull requests.
 
+## Managed policies and limiting them to one repository
+- AWS managed policies: **`AWSCodeCommitFullAccess`** (everything, including create/delete repositories), **`AWSCodeCommitPowerUser`** (full use of repositories, but **can't delete** repositories), **`AWSCodeCommitReadOnly`**.
+- Exam pattern: "developers need full use of CodeCommit but must not delete repositories" -> `AWSCodeCommitPowerUser`.
+- To limit a managed policy to **one repository**, attach an extra policy with an explicit **Deny** on `codecommit:*` for every repository ARN except the allowed one (`NotResource`), or a Deny with a condition on the branch (`codecommit:References`). An explicit deny overrides the managed policy's allow.
+
 ---
 
 [Services index](README.md) | [🏠 Home](../README.md) | [AWS CodeBuild →](codebuild.md)

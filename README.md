@@ -1,12 +1,12 @@
 # AWS Certified DevOps Engineer - Professional (DOP-C02) Study Guide
 
-**Version:** v2.1 (Nov 2026) | **Exam:** Tue, Dec 29, 2026
+**Version:** v2.2 (Nov 2026) | **Exam:** Tue, Dec 29, 2026
 
 Complete DOP-C02 material in one repo:
 - **service notes**, one file per service;
 - **domain chapters** with the exam's cross-service scenarios;
 - **step-by-step labs** with templates;
-- **60 practice questions** and a **46-day plan**.
+- **61 practice questions** and a **46-day plan**.
 
 Built from the official [DOP-C02 exam guide](https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02.html) (all 6 domains, every task statement, the in-scope services list). Facts checked against AWS documentation as of Nov 2026.
 
@@ -25,6 +25,7 @@ Built from the official [DOP-C02 exam guide](https://docs.aws.amazon.com/aws-cer
 | [services/](services/README.md) | 41 service files grouped by area (CI/CD, compute, IaC, governance, resilience, monitoring, security) |
 | `00`-`11` chapters | Strategy, 6 domain chapters, comparisons, practice questions, plan, labs index, cheat sheet |
 | [labs/](labs/README.md) | 16 practical labs: CloudFormation/SAM templates, code, CLI steps, "break it" exercises, cleanup |
+| [resources/](resources/tutorials-dojo-study-path.md) | Tutorials Dojo study path: summary, scenario cross-check, corrections |
 | [mistakes-log.md](mistakes-log.md) | Your personal trap -> rule log |
 
 ## Chapters
@@ -38,7 +39,7 @@ Built from the official [DOP-C02 exam guide](https://docs.aws.amazon.com/aws-cer
 | [5. Domain 5: Incident and Event Response (14%)](05-incident-event-response.md) |
 | [6. Domain 6: Security and Compliance (17%)](06-security-compliance.md) |
 | [7. "Which one?" comparisons + numbers](07-service-comparisons-numbers.md) |
-| [8. 60 practice questions](08-practice-questions.md) |
+| [8. 61 practice questions](08-practice-questions.md) |
 | [9. 46-day study plan + exam-day checklist](09-study-plan.md) |
 | [10. Hands-on labs](10-hands-on-labs.md) |
 | [11. Final cheat sheet](11-final-cheat-sheet.md) |

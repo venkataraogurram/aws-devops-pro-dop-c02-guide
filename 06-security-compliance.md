@@ -42,7 +42,7 @@ Read these service files first, then the sections below.
 - **SSM Automation** multi-account/multi-Region remediation; **Quick Setup** org configs.
 - **Config conformance packs (org)** + **aggregator**.
 - **Firewall Manager** for WAF/SG/Network Firewall policies everywhere.
-- Pipeline security: **CodeGuru Reviewer/Security** (code scanning), **Inspector** (images, Lambda), Access Analyzer policy checks, **cfn-guard/cfn-lint/cfn-nag**, secrets scanning.
+- Pipeline security: **CodeGuru Reviewer/Security** (code and secret scanning; Reviewer accepts no new repository associations since Nov 7, 2025), **Inspector** (images, Lambda), Access Analyzer policy checks, **cfn-guard/cfn-lint/cfn-nag**, secrets scanning.
 
 ## 6.3 Domain 6 scenario quick-map
 

@@ -2,7 +2,7 @@
 
 # Chapter 8 - Practice Questions (exam style, with explanations)
 
-> 60 original questions written in the DOP-C02 style. Try each one before opening the answer. Track wrong answers by domain and re-read that chapter's quick-map.
+> 61 original questions written in the DOP-C02 style. Try each one before opening the answer. Track wrong answers by domain and re-read that chapter's quick-map.
 > These are for practice; they are not real exam questions.
 
 ---
@@ -864,10 +864,24 @@ D. Use CloudTrail Lake.
 
 ---
 
+**Q61.** A company moved its build agents (EC2 in an ASG) to private subnets with no NAT gateway, to meet a "no internet access" rule. At launch, user data must download a 200 MB toolchain archive that used to come from a vendor website. Which solution meets the rule with the LEAST operational overhead?
+
+A. Add a NAT gateway and allow only the vendor's IP range in a network ACL.
+B. Store the archive in an S3 bucket, add an S3 gateway VPC endpoint to the private route tables, and give the instance profile `s3:GetObject` on that object. User data downloads it with the AWS CLI.
+C. Run a proxy server on EC2 in a public subnet that downloads the archive for the build agents.
+D. Attach Elastic IPs during launch and remove them after the download.
+
+<details><summary>Answer</summary>
+
+**B.** A gateway endpoint keeps S3 traffic on the AWS network without internet access, and it costs nothing extra. A and D still give the instances internet access. C adds a server to manage. You can also add an endpoint policy, or a bucket policy with `aws:SourceVpce`, so the bucket is reachable only through that endpoint.
+</details>
+
+---
+
 ## Scoring guide
-- 54+ correct (90%): you are ready. Focus on full timed mocks.
-- 45-53 (75-88%): re-read the quick-maps for the domains where you missed questions.
-- Below 45: re-study those chapters fully, then retest in 3 days.
+- 55+ correct (90%): you are ready. Focus on full timed mocks.
+- 46-54 (75-89%): re-read the quick-maps for the domains where you missed questions.
+- Below 46: re-study those chapters fully, then retest in 3 days.
 
 Track it like this:
 
@@ -878,7 +892,7 @@ Track it like this:
 | 3 Resilience | Q25-Q35 | |
 | 4 Monitoring | Q36-Q45 | |
 | 5 Incident | Q46-Q54 | |
-| 6 Security | Q55-Q60 | |
+| 6 Security | Q55-Q61 | |
 
 ---
 

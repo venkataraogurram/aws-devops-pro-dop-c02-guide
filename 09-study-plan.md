@@ -1,4 +1,4 @@
-[← 8. 60 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [10. Hands-on labs →](10-hands-on-labs.md)
+[← 8. 61 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [10. Hands-on labs →](10-hands-on-labs.md)
 
 # Chapter 9 - 46-Day Study Plan (Nov 14 - Dec 29, 2026)
 
@@ -54,7 +54,7 @@
 | 24 | Mon Dec 7 | [IAM, STS, Identity Center](services/iam-sts-identity-center.md) | [Lab 13](labs/13-iam-boundary-abac/README.md) |
 | 25 | Tue Dec 8 | [KMS/CloudHSM](services/kms-cloudhsm.md), [ACM](services/acm.md), [Secrets Manager](services/secrets-manager-parameter-store.md) | - |
 | 26 | Wed Dec 9 | [Network security](services/network-security.md), [Detection services](services/security-detection.md) | [Lab 14](labs/14-guardduty-security-response/README.md) |
-| 27 | Thu Dec 10 | [Ch 6](06-security-compliance.md) threats/controls, security at scale, quick-map. Q55-Q60 | - |
+| 27 | Thu Dec 10 | [Ch 6](06-security-compliance.md) threats/controls, security at scale, quick-map. Q55-Q61 | - |
 | 28 | Fri Dec 11 | Domain 5 + 6 practice sets | - |
 
 ### Week 5 (Dec 12-18): Consolidate + first full mocks
@@ -98,4 +98,4 @@
 
 ---
 
-[← 8. 60 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [10. Hands-on labs →](10-hands-on-labs.md)
+[← 8. 61 practice questions](08-practice-questions.md) | [🏠 Home](README.md) | [Services](services/README.md) | [Labs](labs/README.md) | [10. Hands-on labs →](10-hands-on-labs.md)

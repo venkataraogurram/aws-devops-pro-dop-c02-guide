@@ -67,6 +67,11 @@
 - Gives on-premises apps access to AWS storage: **S3 File Gateway** (NFS/SMB -> S3), **FSx File Gateway** (SMB -> FSx for Windows), **Volume Gateway** (iSCSI block volumes backed by S3 + EBS snapshots), **Tape Gateway** (virtual tape library -> S3/Glacier).
 - **File Gateway cache**: if objects are added to the bucket directly (not through the gateway), the on-prem file share won't see them until the cache is refreshed. Call the **`RefreshCache` API** (e.g., from Lambda on an S3 event or schedule) or turn on **automated cache refresh** (refresh after a set time).
 
+## RDS event notifications
+- RDS emits events for instances, clusters, snapshots, parameter groups and security groups: **failover**, failure, low storage, maintenance, backup, configuration change, and so on.
+- **RDS event subscriptions** send chosen categories to an **SNS topic** (e.g., "notify the team when a Multi-AZ failover happens"). The same events arrive in **EventBridge** (`aws.rds`, "RDS DB Instance Event"), where a rule can trigger Lambda or SSM Automation.
+- Don't confuse with **AWS Health** events, which cover AWS-side scheduled maintenance affecting your instances.
+
 ---
 
 [← Amazon S3 (events, integrity, protection)](s3.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Amazon Route 53 →](route53.md)

@@ -99,6 +99,7 @@ The exam question bank was written over several years. Some services in it have 
 | Amazon ECS native blue/green | ECS added built-in blue/green (2025) plus linear/canary without CodeDeploy | Most exam questions still expect **CodeDeploy** for ECS blue/green. |
 | AWS App Runner | Closed to new customers from **Apr 30, 2026**; AWS now recommends **Amazon ECS Express Mode** | Still in the in-scope list. Know it as "simplest managed web app from source/image". |
 | SSM Incident Manager | Closed to new customers from **Nov 7, 2025** | Know the concept: response plans, contacts, escalation, runbooks. |
+| Amazon CodeGuru Reviewer | **No new repository associations since Nov 7, 2025** (maintenance mode) | Older questions use it to find hardcoded secrets and code issues in CodeCommit/GitHub PRs. Pick it when offered for that. |
 | Security Hub | Original product renamed **Security Hub CSPM**; a new unified Security Hub launched in 2025 | Questions refer to "Security Hub" findings, standards, aggregation. Same concepts. |
 
 If a question offers a discontinued service and a current managed service that does the same job, prefer the current one.
@@ -107,7 +108,8 @@ If a question offers a discontinued service and a current managed service that d
 
 - Official exam guide: https://docs.aws.amazon.com/aws-certification/latest/devops-engineer-professional-02/devops-engineer-professional-02.html
 - AWS Skill Builder: **"AWS Certified DevOps Engineer - Professional Official Practice Question Set"** (free, 20 questions) and the **Official Practice Exam** (subscription). Take the free set in week 1 as a baseline.
-- AWS whitepapers to skim: "Practicing Continuous Integration and Continuous Delivery on AWS", "Blue/Green Deployments on AWS", "Disaster Recovery of Workloads on AWS", "Organizing Your AWS Environment Using Multiple Accounts", "Infrastructure as Code".
+- AWS whitepapers to skim: "Practicing Continuous Integration and Continuous Delivery on AWS", "Blue/Green Deployments on AWS", "Disaster Recovery of Workloads on AWS", "Organizing Your AWS Environment Using Multiple Accounts", "Infrastructure as Code", "Introduction to DevOps on AWS", "Implementing Microservices on AWS", "Running Containerized Microservices on AWS", "AWS Multi-Region Fundamentals".
+- Tutorials Dojo DOP-C02 study path: see [resources/tutorials-dojo-study-path.md](resources/tutorials-dojo-study-path.md) for what it adds and where each of its scenarios is covered here.
 - A third-party practice exam bank (Tutorials Dojo / similar) for weeks 5-6. Do at least **3 full timed mocks** before Dec 29 and read every explanation, including for the ones you got right.
 
 ---

@@ -48,6 +48,9 @@
 ## AWS Application Auto Scaling
 One scaling API (target tracking, step, scheduled) for non-EC2 resources: **ECS services**, **DynamoDB tables and GSIs**, **Aurora replicas**, **Lambda provisioned concurrency**, **ElastiCache (Redis/Valkey) replication groups**, **EMR clusters**, Spot Fleet, and **custom resources** (your own API).
 
+## Keeping a single legacy instance alive
+A legacy app that can only run on **one** instance: put it in an ASG with **min = max = desired = 1** (across several AZs/subnets). If the instance or its AZ fails, the ASG launches a replacement automatically. Combine with an Elastic IP re-associated by user data, or a load balancer / Route 53 record, so clients find the new instance. Cheaper and more complete than EC2 auto recovery alone, which can't help if the AZ is down.
+
 ---
 
 [← AWS Step Functions and Lambda automation](step-functions.md) | [Services index](README.md) | [🏠 Home](../README.md) | [Elastic Load Balancing and compute high availability →](elastic-load-balancing.md)

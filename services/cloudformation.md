@@ -180,6 +180,10 @@ Note: service-managed StackSets do **not deploy to the management account** - de
 - **Service role**: CloudFormation uses this role for all stack operations; users only need `iam:PassRole` + CloudFormation permissions (least privilege).
 - **Enable a service that may already be on** (e.g., GuardDuty detector across many accounts): a plain resource fails if the detector exists, so use a **Lambda-backed custom resource** that enables it only if needed, deployed with **StackSets** across the org.
 
+## Lambda code in a template
+- `AWS::Lambda::Function` `Code` property: **`S3Bucket` + `S3Key`** (+ optional `S3ObjectVersion`) for a zip file in S3, **`ImageUri`** for a container image in ECR, or **`ZipFile`** for short inline code (Node.js/Python only, no dependencies beyond the runtime).
+- Changing only the zip file in S3 under the **same key** doesn't update the function: CloudFormation sees no template change. Use a new key or `S3ObjectVersion` (SAM's `CodeUri` and `sam package` do this for you).
+
 ---
 
 [← Elastic Load Balancing and compute high availability](elastic-load-balancing.md) | [Services index](README.md) | [🏠 Home](../README.md) | [AWS SAM and AWS CDK →](sam-cdk.md)

@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2 - 2026-11-13
+- Added `resources/tutorials-dojo-study-path.md`: summary of the Tutorials Dojo DOP-C02 study path (in my own words, with a link to the original), its ~60 scenarios mapped to this repo, and corrections (OpsWorks end of life; CodeGuru Reviewer in maintenance mode since Nov 7, 2025; no "MinimumHealthyHosts" CloudWatch metric; nested vs cross-stack outputs; organization trail; Elasticsearch -> OpenSearch; Application Discovery Service out of scope).
+- Gaps filled: CodeCommit managed policies and per-repo Deny, Lambda `Code` (S3Bucket/S3Key/ZipFile) in CloudFormation, single-instance ASG (min=max=1), RDS event notifications, S3 delete notifications, CodeGuru Reviewer status in Chapter 0, more whitepapers in Chapter 0.
+- Practice question Q61 (S3 gateway endpoint instead of internet access).
+
 ## v2.1 - 2026-11-13
 - Scope audit against the official exam guide (in-scope services list, task statements, Technologies and Concepts, out-of-scope tasks). Added a "What is NOT on the exam" section and the keep/cut rule to Chapter 0.
 - Removed services that are not in scope: Amplify (file deleted), Audit Manager, AWS Artifact, DevOps Guru, CloudWatch RUM / Internet Monitor / Evidently / Application Signals / Investigations, Managed Service for Apache Flink, MSK, Route 53 ARC, Verified Access, Nitro Enclaves, AWS Signer, IoT Greengrass, CodePipeline Device Farm/Jenkins providers, non-listed Application Auto Scaling targets.
